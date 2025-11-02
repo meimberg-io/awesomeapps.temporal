@@ -1,0 +1,32 @@
+{
+  "name": "awesomeapps.temporal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Temporal workflows for awesomeapps",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/src/worker.js",
+    "start:dev": "tsx watch src/worker.ts",
+    "test:workflow": "tsx src/test-client.ts",
+    "lint": "echo 'No linting configured'",
+    "test": "echo 'No tests configured'",
+    "test:ci": "echo 'No tests configured'"
+  },
+  "dependencies": {
+    "@temporalio/client": "^1.11.1",
+    "@temporalio/worker": "^1.11.1",
+    "@temporalio/workflow": "^1.11.1",
+    "@temporalio/activity": "^1.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.7.0",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  }
+}
+
