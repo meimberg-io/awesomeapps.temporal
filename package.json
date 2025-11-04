@@ -8,19 +8,44 @@
     "dev": "tsc --watch",
     "start": "node dist/src/worker.js",
     "start:dev": "tsx watch src/worker.ts",
-    "test:workflow": "tsx src/test-client.ts",
+    
+    "test:openai:abstract": "tsx src/test/test-openai-abstract.ts",
+    "test:openai:url": "tsx src/test/test-openai-url.ts",
+    "test:openai:description": "tsx src/test/test-openai-description.ts",
+    "test:openai:functionality": "tsx src/test/test-openai-functionality.ts",
+    "test:openai:shortfacts": "tsx src/test/test-openai-shortfacts.ts",
+    "test:openai:pricing": "tsx src/test/test-openai-pricing.ts",
+    "test:openai:tags": "tsx src/test/test-openai-tags.ts",
+    "test:openai:video": "tsx src/test/test-openai-video.ts",
+    "test:openai:all": "tsx src/test/test-all-openai.ts",
+
+    "test:gemini:abstract": "tsx src/test/test-gemini-abstract.ts",
+    "test:gemini:url": "tsx src/test/test-gemini-url.ts",
+    "test:gemini:description": "tsx src/test/test-gemini-description.ts",
+    "test:gemini:functionality": "tsx src/test/test-gemini-functionality.ts",
+    "test:gemini:shortfacts": "tsx src/test/test-gemini-shortfacts.ts",
+    "test:gemini:pricing": "tsx src/test/test-gemini-pricing.ts",
+    "test:gemini:tags": "tsx src/test/test-gemini-tags.ts",
+    "test:gemini:all": "tsx src/test/test-all-gemini.ts",
+    
     "lint": "echo 'No linting configured'",
     "test": "echo 'No tests configured'",
     "test:ci": "echo 'No tests configured'"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@temporalio/activity": "^1.11.1",
     "@temporalio/client": "^1.11.1",
+    "@temporalio/testing": "^1.13.1",
     "@temporalio/worker": "^1.11.1",
     "@temporalio/workflow": "^1.11.1",
-    "@temporalio/activity": "^1.11.1"
+    "form-data": "^4.0.0",
+    "openai": "^4.28.0"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@temporalio/testing": "^1.11.1",
+    "dotenv": "^16.6.1",
     "tsx": "^4.7.0",
     "typescript": "^5.7.3"
   },
@@ -29,4 +54,3 @@
     "npm": ">=6.0.0"
   }
 }
-

@@ -1,0 +1,2368 @@
+{
+  "name": "awesomeapps - service",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Check service existing').first().json.data.services.length }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "id": "fc14986f-86d3-42d1-99e4-a15587dec7e3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "existing"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "846f0618-a42f-4ebb-b3f0-681548b6ed06",
+                    "leftValue": "={{ $('Check service existing').first().json.data.services.length }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "notexisting"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1264,
+        48
+      ],
+      "id": "d1b4ef9c-9cf1-4a1d-9c26-2869843c5e70",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://awesomeapps-strapi.meimberg.io/api/services",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "= \n{\n\"data\": {{  $('Data Array').first().json.data.toJsonString() }}\n\n\n}\n\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1536,
+        144
+      ],
+      "id": "adfc8f4f-c99c-4d31-9d94-214f22911604",
+      "name": "Create Strapi",
+      "executeOnce": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CeUvr1IO6LHNS80v",
+          "name": "Strapi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://awesomeapps-strapi.meimberg.io/api/services/{{ $('Check service existing').first().json.data.services[0].documentId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {{  $('Data Array').first().json.data.toJsonString() }}\n}\n\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1520,
+        -96
+      ],
+      "id": "b79b28b2-2d09-4ba8-be1a-609dc7655b03",
+      "name": "Update Strapi",
+      "alwaysOutputData": false,
+      "executeOnce": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CeUvr1IO6LHNS80v",
+          "name": "Strapi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "id": "826ff00b-3836-4241-b9f3-73f110cfd659",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1952,
+        -1456
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=pricing of service {{ $('Input').first().json.name }}: in the form of a markdown table. state pricing categories, a short description if you have the price. If there is a free usage possible, include this (write \"free\" instead of $0). \n\nLanguage: English\n\nNo more text, introduction, or other words. Just the markdown table. nothing else. \n\nIf you don't find a pricing, just state nothing.",
+        "options": {}
+      },
+      "id": "16cbbd5f-f0a5-4dd7-89e9-d2e095055ad7",
+      "name": "Pricing",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1856,
+        -1680
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "endpoint": "https://awesomeapps-strapi.meimberg.io/graphql",
+        "query": "query GetTags {\n    tags(sort: \"name:asc\") {\n        documentId\n        name        \n    }\n}"
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1.1,
+      "position": [
+        -1696,
+        -848
+      ],
+      "id": "c343b45a-c2ff-41da-8b19-13d3c35a76c3",
+      "name": "Get all Tags"
+    },
+    {
+      "parameters": {
+        "requestMethod": "GET",
+        "endpoint": "https://awesomeapps-strapi.meimberg.io/graphql",
+        "query": "=query GetServiceDetailBySlug {\n  services(filters: { slug: { eq: \"{{ $('Input').item.json.slug }}\"} }) {\n            documentId\n            name\n            slug\n            url\n        }\n    }\n\n"
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1.1,
+      "position": [
+        -2336,
+        -1440
+      ],
+      "id": "32c469fc-4ecc-471b-a9ea-4bdce7c5e9d7",
+      "name": "Check service existing"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://awesomeapps-strapi.meimberg.io/api/tags",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n\t\"name\": \"{{ $json.name }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        -880
+      ],
+      "id": "e377ad39-b19e-4b30-8504-6c2a2bdf5c95",
+      "name": "Create New Tags",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CeUvr1IO6LHNS80v",
+          "name": "Strapi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const updatedDocumentIds = $input.all().map(tag => tag.json.documentId);\nreturn [ { json: { tags: updatedDocumentIds } } ];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -576
+      ],
+      "id": "45afd427-c81d-40d9-8d39-8966b170c092",
+      "name": "Assemble Taglist"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "service"
+            },
+            {
+              "name": "fields",
+              "type": "array"
+            },
+            {
+              "name": "newtags",
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2960,
+        -1552
+      ],
+      "id": "ab69cb1c-b059-4179-9b81-70f3f903c110",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "jsCode": "function slugify(name) {\n  return name\n    .toLowerCase()\n    .trim()\n    .replace(/[^a-z0-9]+/g, '-')\n    .replace(/^-+|-+$/g, '');\n}\n\nreturn [{ \n  json: { \n    name: $input.first().json.service,\n    slug: slugify($input.first().json.service),\n    fields: $input.first().json.fields,\n    newtags: ($input.first().json.newtags == \"true\") || ($input.first().json.newtags == true)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2496,
+        -1440
+      ],
+      "id": "2450d89e-b9a8-4386-9271-e13208a2d935",
+      "name": "Input"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n      documentId: $input.first().json.data.documentId,\n      name: $input.first().json.data.name\n    }    \n}]\n  "
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        -880
+      ],
+      "id": "d82bd3c9-9e1b-4d38-ac4c-06b61a6dcebb",
+      "name": "Reformat Created Tags"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        128,
+        -656
+      ],
+      "id": "fdde321e-5450-4908-8900-127f8f7f1838",
+      "name": "Tags"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = {\n  data: {}\n};\n\nfunction getSafeJsonXXX(nodeName, path) {\n  try {\n    const nodeData = $(nodeName).first().json;\n    if (!nodeData) return undefined;\n\n    return path.split('.').reduce((obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined), nodeData);\n  } catch (error) {\n    return undefined; // Falls der Node nicht existiert oder nicht ausgeführt wurde\n  }\n}\n\n\nfunction tokenizePath(path) {\n  if (!path || typeof path !== 'string') return [];\n  // first() -> [0]\n  const normalized = path.replace(/\\.first\\(\\)/g, '[0]');\n  const tokens = [];\n  const re = /[^.[\\]]+|\\[(\\d+)\\]/g;\n  let m;\n  while ((m = re.exec(normalized)) !== null) {\n    tokens.push(m[1] !== undefined ? Number(m[1]) : m[0]);\n  }\n  return tokens;\n}\n\nfunction getSafeJson(nodeName, path) {\n  try {\n    const nodeData = $(nodeName).first().json;\n    if (!nodeData) return undefined;\n    if (!path) return nodeData;\n\n    const tokens = tokenizePath(path);\n    return tokens.reduce((obj, key) => {\n      if (obj == null) return undefined;\n      return obj[key];\n    }, nodeData);\n  } catch (error) {\n    return undefined; // Node existiert nicht oder wurde nicht ausgeführt\n  }\n}\n\n\nconst fields = {\n  slug: getSafeJson('Input', 'slug'),\n  name: getSafeJson('Input', 'name'),\n  abstract: getSafeJson('Abstract', 'output'),\n  description: getSafeJson('Description', 'output'),\n  shortfacts: getSafeJson('Shortfacts', 'output'),\n  functionality: getSafeJson('Functionality', 'output'),\n  url: getSafeJson('urlHttps', 'url'),\n  youtube_video: getSafeJson('YoutubeData', 'video'),\n  youtube_title: getSafeJson('YoutubeData', 'title'),\n  pricing: getSafeJson('Pricing', 'output')?.replace(/```markdown\\s*/, '').replace(/```/, '').trim(),\n  tags: getSafeJson('finalTags','tags'),\n};\n\n// Füge nur Felder hinzu, die nicht `undefined`, `null` oder leer sind\nObject.entries(fields).forEach(([key, value]) => {\n  if (Array.isArray(value) ? value.length > 0 : value) {\n    payload.data[key] = value;\n  }\n});\n\n// logo disabled, they are hotlinked\n\n//const   logo = getSafeJson('Logo', 'documentId');\n//if(logo !== null){\n//    payload.data[\"logo\"] = [logo];\n//}\n  \n\n\nreturn payload;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        16
+      ],
+      "id": "6d2eec2a-e062-4d03-9cd2-20f3f88a159a",
+      "name": "Data Array"
+    },
+    {
+      "parameters": {
+        "jsCode": "const existingTags = $('Get all Tags').first().json.data.tags;\nconst existingTagsMap = existingTags.reduce((map, tag) => {\n  map.set(tag.name, tag.documentId);\n  return map;\n}, new Map());\n\nconst x = $input.first().json.output.split(\",\").map(t => {\n    const trimmedTag = t.trim(); // Falls es Leerzeichen gibt\n\n  return {\n    \"name\": trimmedTag,\n    \"documentId\": existingTagsMap.has(trimmedTag) ? existingTagsMap.get(trimmedTag) : \"new\"\n  }\n})\n\nreturn  x   ;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -752,
+        -864
+      ],
+      "id": "22755e64-7b86-4001-b6cc-f5f19bdb91b7",
+      "name": "Fix Wrong NEW1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const tags = $input.first().json.data.tags.map(tag => {return tag.name;}).join(\", \");\nreturn [{  \"tags\":  tags  }];\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        -848
+      ],
+      "id": "ae784857-483a-4494-892b-e3c1e857a48d",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "[\n  {\n    \"service\": \"Cursor\",\n    \"fields\": [\n      \"url\",\n      \"description\",\n      \"functionality\",\n      \"abstract\",\n      \"pricing\",\n      \"tags\",\n      \"video\",\n      \"shortfacts\"\n    ],\n    \"newtags\": false\n  }\n]",
+        "height": 340,
+        "width": 380,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2912,
+        -880
+      ],
+      "id": "80c97852-f6d3-44a0-80ce-44edeb91e7eb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "906589a2-6897-4979-b716-08032e71ba6b",
+              "leftValue": "={{$input.item.json.documentId.toLowerCase() === \"new\"  }}",
+              "rightValue": "\"\"",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        -864
+      ],
+      "id": "702c1704-b7b8-47e8-9962-fc3a49faab75",
+      "name": "If is new"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "url",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2016,
+        -1440
+      ],
+      "id": "c29d28bf-399c-4ed1-a330-7628e7c3b1b7",
+      "name": "If url"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function enforceHttps(url) {\n  const stringUrl = String(url || '').trim();             // In String umwandeln + trimmen\n  const cleaned = stringUrl.replace(/^https?:\\/\\//i, ''); // http(s) entfernen\n  return 'https://' + cleaned;\n}\n\nreturn {\n\n  json: {\n    url: enforceHttps($json.output)\n  }\n}\n  \n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1440,
+        -1712
+      ],
+      "id": "bc4fcd5f-6c38-4f7a-aaec-a56aa455f86e",
+      "name": "urlHttps"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        752,
+        -400
+      ],
+      "id": "f9966245-52a2-45af-8c50-f59f2a7abbc2",
+      "name": "finalTags"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "  const cleaned = $json.cleaned\n\nreturn {\n   json: {\n     video: JSON.parse(cleaned).id.videoId,\n     title: JSON.parse(cleaned).snippet.title\n   } \n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -176
+      ],
+      "id": "c30e3aea-d610-4fcd-b328-694cb0a826c7",
+      "name": "YoutubeData"
+    },
+    {
+      "parameters": {
+        "url": "=https://youtube.googleapis.com/youtube/v3/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Input').first().json.name }}"
+            },
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "maxResults",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1104,
+        -32
+      ],
+      "id": "39b8434f-bc58-4ed5-b488-67e2b6682dfb",
+      "name": "Search Youtube API",
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "4rcairzYVf0tqdu9",
+          "name": "Google for Youtube"
+        },
+        "httpQueryAuth": {
+          "id": "oBWQwE82uFcAoHzn",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is a list of YouTube videos:\n\n{{  $json.videos }}\n\n---\n\nReturn the video that best suits introducing a user to the app/service “{{ $('Input').first().json.name }}”.\n\nOnly return the video. Return the complete JSON for the video. Make sure to return the complete JSON. The JSON must be valid! And only return the JSON, no text, no explanation, no punctuation. No Markdown, no embedding in ```",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -624,
+        -176
+      ],
+      "id": "3bec5a6c-0635-4bf3-b003-f13c0df20a5d",
+      "name": "ChooseOneVideo",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  json: {\n    videos: JSON.stringify($input.first().json.items)\n  }\n}\n  \n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -816,
+        -176
+      ],
+      "id": "3224f6d9-d3b0-42f2-b5f4-604b77bbaf24",
+      "name": "StringifyYoutube"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "  const cleaned = $json.output\n    .replace(/```json\\s*|\\s*```/g, '')\n    .replace(/\\\\n/g, '');\n\nreturn {\n  json: {\n    cleaned: cleaned\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -176
+      ],
+      "id": "901e097e-aba6-4548-8225-5855632021f0",
+      "name": "FixYoutubeJson"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -608,
+        48
+      ],
+      "id": "2b220ad8-eca2-4cc4-98f7-32508dc33336",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "TF3A7uIjRhSMP2dC",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractDomainFromString(str) {\n  const match = str.match(/^(?:https?:\\/\\/)?(?:www\\.)?([^\\/:?#]+)/i);\n  return match ? match[1] : null;\n}\n\nconst url = $input.first().json.url ? \n  $input.first().json.url : \n  $('Check service existing').first().json.data.services[0].url\n\n\nreturn {\n  json: {\n    domain: extractDomainFromString(url)\n  }\n}\n  \n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1104,
+        1888
+      ],
+      "id": "b42fbdd9-de28-4975-8a59-8d32fbbfdb9c",
+      "name": "getDomain"
+    },
+    {
+      "parameters": {
+        "domain": "={{ $json.domain }}",
+        "download": true,
+        "imageTypes": [
+          "icon"
+        ],
+        "imageFormats": [
+          "png",
+          "svg"
+        ]
+      },
+      "type": "n8n-nodes-base.Brandfetch",
+      "typeVersion": 1,
+      "position": [
+        64,
+        1872
+      ],
+      "id": "31779fd6-c60f-4e93-b05a-debd58502633",
+      "name": "Brandfetch1",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "brandfetchApi": {
+          "id": "HLIwswG6D3FR7360",
+          "name": "Brandfetch account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://serviceatlas-strapi.meimberg.io/api/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "files",
+              "inputDataFieldName": "=logo_png"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        1840
+      ],
+      "id": "55fb6f46-f134-4b9c-9c79-b794a2014f67",
+      "name": "UploadLogo",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CeUvr1IO6LHNS80v",
+          "name": "Strapi Account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "logo",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1408,
+        2208
+      ],
+      "id": "7c1a4872-01fa-4819-a9f2-a18cc2ec043e",
+      "name": "If logo"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        560,
+        2160
+      ],
+      "id": "3f1c94fe-7bcf-4896-895e-717776b6070c",
+      "name": "No Operation, do nothing5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const logo = $input.first().json.id ? $input.first().json.id : null\n\nreturn {\n  json: {\n    documentId: logo\n  }\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        2000
+      ],
+      "id": "0fd50f2a-be7a-40a5-9d6a-d46f8c8b9c77",
+      "name": "Logo"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1808,
+        -1424
+      ],
+      "id": "434e31bf-fb5f-4fa8-9b1f-267fc7d51d9d",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Mv6bZaFsxZ8EEwYF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Update or create Service",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "service"
+            },
+            {
+              "fieldLabel": "fields",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "url"
+                  },
+                  {
+                    "option": "description"
+                  },
+                  {
+                    "option": "pricing"
+                  },
+                  {
+                    "option": "shortfacts"
+                  },
+                  {
+                    "option": "abstract"
+                  },
+                  {
+                    "option": "functionality"
+                  },
+                  {
+                    "option": "logo"
+                  },
+                  {
+                    "option": "tags"
+                  },
+                  {
+                    "option": "video"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "newtags"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -2720,
+        -1344
+      ],
+      "id": "54bd4777-91ff-4152-82d9-d3abeee15d8b",
+      "name": "On form submission",
+      "webhookId": "b4025e80-71bf-4d11-94b9-5613c40f6178"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "tags",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1840,
+        -400
+      ],
+      "id": "bc826af0-0fe2-488c-bb79-91fd91ad8dee",
+      "name": "If tags"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -2176,
+        -1440
+      ],
+      "id": "54f5a413-b80f-4399-a05d-81446310c17b",
+      "name": "noop"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "description",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -656,
+        -1408
+      ],
+      "id": "a3e99916-1d27-41ba-9e28-c85c67018904",
+      "name": "description"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "abstract",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        -1392
+      ],
+      "id": "490534ee-4a30-4b37-9c7f-0f0c83aa9455",
+      "name": "abstract"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "functionality",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        -1376
+      ],
+      "id": "c14c7e2c-cf63-4a09-ac3f-4f79b1ec22bd",
+      "name": "fuctionality"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').item.json.fields }}",
+              "rightValue": "shortfacts",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        -1360
+      ],
+      "id": "6c93b644-bf79-4efd-8ea9-7a8d7c4e6462",
+      "name": "shortfacts"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "pricing",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        -1344
+      ],
+      "id": "a448beab-5c54-41a2-b664-6bf2d628b32f",
+      "name": "pricing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        -1344
+      ],
+      "id": "b4168752-cd7a-4d41-b979-e9ea8effa64b",
+      "name": "noop1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -1328
+      ],
+      "id": "8f544c2a-9017-44c9-ba5b-9710edc8cb89",
+      "name": "noop2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        224,
+        160
+      ],
+      "id": "ed2cc787-7cf7-4430-a2d3-e76e421e405d",
+      "name": "noop3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=URL of the platform “{{ $('Input').item.json.name }}”. Respond only with the complete URL, e.g., https://agent.ai. No explanations, no warnings. Just the URL. ",
+        "options": {}
+      },
+      "id": "c3060638-28dc-4e48-9955-2b0055deb480",
+      "name": "URL",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1728,
+        -1712
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "id": "c4cadd24-b129-4228-94d0-5dad37401faa",
+      "name": "Window Buffer Memory1",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        880,
+        -2208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short description (100-200 words) of the service / the app: {{ $('Input').first().json.name }}. \n\nThe text should have 3-4 subheadings. \n\nPlease use Markdown, but only use heading formatting. \n\nThe first heading should be on the second level (##), all others should be on the third level (###).\n\nPlease only output the Markdown, no additional text around it. Please only output the pure Markdown, do not surround it with ```markdown and ```",
+        "options": {}
+      },
+      "id": "913151fa-8e21-4384-a3e9-50450da283ac",
+      "name": "Description",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -384,
+        -1696
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -2048
+      ],
+      "id": "25a18f08-eec9-4cab-8302-ee83e47df165",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Mv6bZaFsxZ8EEwYF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short descriptive sentence (60–120 characters) without an article at the beginning of the sentence and without mentioning the name again, referring to the following service: {{ $('Input').first().json.name }}",
+        "options": {}
+      },
+      "id": "8308a229-7dcf-4f24-b9c8-e85251b08550",
+      "name": "Abstract",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        96,
+        -1696
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a concise list of 3–8 important functions and uses as bullet points for the following internet service/app: {{ $('Input').item.json.name }}. The list should clearly convey the core characteristics, categories, and top features for users so that they can understand at a glance what the service is suitable for. \n\nThe list should NOT list content offered by the platform, but rather features and uses.\n\nExample for Canva:\n\n* User-friendly design templates\n* Diverse fonts and color palettes\n* Simple drag-and-drop functionality\n* Large selection of free stock photos\n* Ability to collaborate in a team\n* Customizable infographics and charts\n\nPlease create the answer in pure Markdown, but only use list markers.\n\nPlease only output the Markdown, no additional text around it. Please only output the pure Markdown, do not surround it with ```markdown and ```\n\n\nNow create such a list for {{ $('Input').item.json.name }}.",
+        "options": {
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "796c0bb6-6f82-42a9-994f-ea1685298ffd",
+      "name": "Functionality",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        528,
+        -1696
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=In a short, coherent sentence (100-200 characters), list the most important facts about the app {{ $('Input').item.json.name }} that are of interest to users. Write in a professional journalistic style, using commas to separate information.",
+        "options": {
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "1e9c0947-4804-42b3-9b07-6f0153f9f73b",
+      "name": "Shortfacts",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        992,
+        -1696
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  json: {}\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        2192
+      ],
+      "id": "be962cc1-a09b-4808-83c7-1c2421eb0070",
+      "name": "clear"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=I run a website that catalogs all kinds of internet services and organizes them by tags.\n\nThis is the global tag list: {{ $json.tags }}\n\nNow search this list for suitable tags for the app/service {{ $('Input').first().json.name }}. If only one really fits, use only that one. If several fit, use several. There should not be more than 6. There can also be fewer. Only tags that describe the core function of the service or app should be used, not any secondary functions.\n\nOutput the tags without any additional text, separated by commas!",
+        "options": {}
+      },
+      "id": "6bb1def4-d95a-4e85-a4e3-4300154a5daf",
+      "name": "Choose Tags",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1232,
+        -848
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b88cbdf8-b3b8-4465-988a-c233a741e29c",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d934cfa-1923-4ec0-a867-998f524ad3a1",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "511f4f91-f6bf-4f3e-8f52-fdf895870715",
+              "leftValue": "={{ $('Input').first().json.fields }}",
+              "rightValue": "video",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1664,
+        144
+      ],
+      "id": "966bfa07-4ac9-4c62-94de-e93f0116e7cc",
+      "name": "If video1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.brandfetch.io/v2/brands/{{ $json.domain }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -896,
+        1888
+      ],
+      "id": "c39970c1-5734-405e-80db-9fbb074eb9d2",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "path": "559994f0-0fb1-4a0f-83b7-1c2b7c10563d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3120,
+        -1904
+      ],
+      "id": "910cb54c-57ab-47d1-bdf0-fb15efdd04df",
+      "name": "Webhook",
+      "webhookId": "559994f0-0fb1-4a0f-83b7-1c2b7c10563d"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn {\n  json: $input.first().json.query\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2432,
+        -1952
+      ],
+      "id": "88e95e11-db84-4fff-a22d-aacc221e0a2f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "UxndSFHh7ve4DPto",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/UxndSFHh7ve4DPto",
+          "cachedResultName": "serviceatlas - translate"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "service": "={{ $json.data.name }}",
+            "newtags": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "service",
+              "displayName": "service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "fields",
+              "displayName": "fields",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "newtags",
+              "displayName": "newtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1856,
+        -112
+      ],
+      "id": "ebc5366c-54b1-4628-9325-6d355a23314c",
+      "name": "Call 'serviceatlas - translate'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "UxndSFHh7ve4DPto",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/UxndSFHh7ve4DPto",
+          "cachedResultName": "serviceatlas - translate"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "service": "={{ $json.data.name }}",
+            "newtags": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "service",
+              "displayName": "service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "fields",
+              "displayName": "fields",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "newtags",
+              "displayName": "newtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1856,
+        160
+      ],
+      "id": "66b58f62-dc74-46ec-a314-efe74f3add43",
+      "name": "Call 'serviceatlas - translate'1"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "service": "VEED.IO",
+          "fields": [
+            "url",
+            "tags",
+            "pricing"
+          ],
+          "newtags": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Update Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Pricing",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pricing": {
+      "main": [
+        [
+          {
+            "node": "noop2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all Tags": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check service existing": {
+      "main": [
+        [
+          {
+            "node": "noop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create New Tags": {
+      "main": [
+        [
+          {
+            "node": "Reformat Created Tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Taglist": {
+      "main": [
+        [
+          {
+            "node": "finalTags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Check service existing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reformat Created Tags": {
+      "main": [
+        []
+      ]
+    },
+    "Tags": {
+      "main": [
+        [
+          {
+            "node": "Assemble Taglist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Array": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Choose Tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fix Wrong NEW1": {
+      "main": [
+        [
+          {
+            "node": "If is new",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If is new": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Tags",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If url": {
+      "main": [
+        [
+          {
+            "node": "URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "urlHttps": {
+      "main": [
+        [
+          {
+            "node": "description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "finalTags": {
+      "main": [
+        [
+          {
+            "node": "If video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YoutubeData": {
+      "main": [
+        [
+          {
+            "node": "noop3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Youtube API": {
+      "main": [
+        [
+          {
+            "node": "StringifyYoutube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ChooseOneVideo": {
+      "main": [
+        [
+          {
+            "node": "FixYoutubeJson",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "StringifyYoutube": {
+      "main": [
+        [
+          {
+            "node": "ChooseOneVideo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FixYoutubeJson": {
+      "main": [
+        [
+          {
+            "node": "YoutubeData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "ChooseOneVideo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getDomain": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brandfetch1": {
+      "main": [
+        [
+          {
+            "node": "UploadLogo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UploadLogo": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If logo": {
+      "main": [
+        [
+          {
+            "node": "getDomain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "clear",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing5": {
+      "main": [
+        [
+          {
+            "node": "Logo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logo": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Pricing",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If tags": {
+      "main": [
+        [
+          {
+            "node": "Get all Tags",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "finalTags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "noop": {
+      "main": [
+        [
+          {
+            "node": "If url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "description": {
+      "main": [
+        [
+          {
+            "node": "Description",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "abstract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "abstract": {
+      "main": [
+        [
+          {
+            "node": "Abstract",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "fuctionality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fuctionality": {
+      "main": [
+        [
+          {
+            "node": "Functionality",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "shortfacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "shortfacts": {
+      "main": [
+        [
+          {
+            "node": "Shortfacts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "noop1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pricing": {
+      "main": [
+        [
+          {
+            "node": "Pricing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "noop2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "noop1": {
+      "main": [
+        [
+          {
+            "node": "pricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "noop2": {
+      "main": [
+        [
+          {
+            "node": "If tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "noop3": {
+      "main": [
+        [
+          {
+            "node": "Data Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL": {
+      "main": [
+        [
+          {
+            "node": "urlHttps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "URL",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Description",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Shortfacts",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Functionality",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Abstract",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Choose Tags",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Description": {
+      "main": [
+        [
+          {
+            "node": "abstract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Description",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "URL",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Abstract",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Functionality",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Shortfacts",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Choose Tags",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abstract": {
+      "main": [
+        [
+          {
+            "node": "fuctionality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Functionality": {
+      "main": [
+        [
+          {
+            "node": "shortfacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shortfacts": {
+      "main": [
+        [
+          {
+            "node": "noop1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clear": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose Tags": {
+      "main": [
+        [
+          {
+            "node": "Fix Wrong NEW1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If video1": {
+      "main": [
+        [
+          {
+            "node": "Search Youtube API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "noop3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Brandfetch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Strapi": {
+      "main": [
+        [
+          {
+            "node": "Call 'serviceatlas - translate'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Strapi": {
+      "main": [
+        [
+          {
+            "node": "Call 'serviceatlas - translate'1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "84f0b00c-1575-4bb7-9c83-bc1cbe48c9cd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "614f4ac1770d547a84f14994b79bd2091454195ebec18a9773bbbdc2834c261d"
+  },
+  "id": "jGdTe3phWBXxXdu6",
+  "tags": [
+    {
+      "createdAt": "2025-03-27T20:32:44.481Z",
+      "updatedAt": "2025-03-27T20:32:44.481Z",
+      "id": "U53kS7HuiBaY3SiC",
+      "name": "serviceatls"
+    }
+  ]
+}

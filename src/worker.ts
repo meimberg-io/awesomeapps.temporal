@@ -1,5 +1,15 @@
 import { NativeConnection, Worker } from '@temporalio/worker'
-import * as activities from './activities/example'
+import * as strapiActivities from './activities/strapi'
+import * as geminiActivities from './activities/gemini'
+import * as openaiActivities from './activities/openai'
+import * as externalActivities from './activities/external'
+
+const activities = {
+  ...strapiActivities,
+  ...geminiActivities,
+  ...openaiActivities,
+  ...externalActivities
+}
 
 async function run() {
   const connection = await NativeConnection.connect({
@@ -11,7 +21,7 @@ async function run() {
     namespace: process.env.TEMPORAL_NAMESPACE || 'default',
     taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'awesomeapps-tasks',
     workflowsPath: require.resolve('./workflows'),
-    activities,
+    activities: activities as any,
     maxConcurrentActivityTaskExecutions: parseInt(
       process.env.MAX_CONCURRENT_ACTIVITIES || '10',
       10

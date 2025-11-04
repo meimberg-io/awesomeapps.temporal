@@ -1,5 +1,6 @@
 import { Connection, Client } from '@temporalio/client'
-import { exampleWorkflow } from './workflows/example'
+import { serviceWorkflow } from './workflows/service'
+import type { ServiceWorkflowInput } from './types/service'
 
 export async function createClient() {
   const connection = await Connection.connect({
@@ -14,18 +15,19 @@ export async function createClient() {
   return { client, connection }
 }
 
-export async function startExampleWorkflow(name: string) {
+export async function startServiceWorkflow(input: ServiceWorkflowInput) {
   const { client, connection } = await createClient()
 
-  const handle = await client.workflow.start(exampleWorkflow, {
-    args: [name],
+  const handle = await client.workflow.start(serviceWorkflow, {
+    args: [input],
     taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'awesomeapps-tasks',
-    workflowId: `example-${Date.now()}`
+    workflowId: `service-${slugify(input.service)}-${Date.now()}`
   })
 
-  console.log('Workflow started', {
+  console.log('Service workflow started', {
     workflowId: handle.workflowId,
-    runId: handle.firstExecutionRunId
+    runId: handle.firstExecutionRunId,
+    service: input.service
   })
 
   const result = await handle.result()
@@ -33,5 +35,13 @@ export async function startExampleWorkflow(name: string) {
   await connection.close()
 
   return result
+}
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
