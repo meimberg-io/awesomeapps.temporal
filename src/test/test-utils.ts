@@ -55,7 +55,7 @@ export async function testYouTubeVideoActivity(
     scheduledTimestampMs: Date.now()
   })
 
-  const result = await env.run(activityFunction, serviceName)
+  const result = await env.run(activityFunction, serviceName) as YouTubeVideo | null
 
   if (result && result.id && result.id.videoId && result.snippet && result.snippet.title) {
     console.log(`✅ ${activityType}`)

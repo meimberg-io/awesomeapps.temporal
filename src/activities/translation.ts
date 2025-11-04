@@ -1,0 +1,61 @@
+import {log} from '@temporalio/activity'
+import OpenAI from 'openai'
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
+
+if (!OPENAI_API_KEY) {
+  console.warn('OPENAI_API_KEY not set')
+}
+
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY
+})
+
+async function translateText(text: string, preserveMarkdown: boolean = false): Promise<string> {
+  log.info('Translating text to German', {textLength: text.length, preserveMarkdown})
+
+  const systemMessage = preserveMarkdown
+    ? 'Return only the translated text. No comments. The text is in markdown. The markdown formatting must be preserved.'
+    : 'Return only the translated text. No comments.'
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: systemMessage
+      },
+      {
+        role: 'user',
+        content: `Translate the following text to German: ${text}`
+      }
+    ],
+    temperature: 0.3
+  })
+
+  const translation = completion.choices[0]?.message?.content || ''
+  log.info('Translation completed', {originalLength: text.length, translationLength: translation.length})
+  
+  return translation
+}
+
+export async function translateAbstract(text: string): Promise<string> {
+  return await translateText(text, false)
+}
+
+export async function translateDescription(text: string): Promise<string> {
+  return await translateText(text, true)
+}
+
+export async function translateFunctionality(text: string): Promise<string> {
+  return await translateText(text, true)
+}
+
+export async function translateShortfacts(text: string): Promise<string> {
+  return await translateText(text, false)
+}
+
+export async function translatePricing(text: string): Promise<string> {
+  return await translateText(text, true)
+}
+

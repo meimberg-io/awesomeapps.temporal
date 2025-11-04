@@ -80,3 +80,49 @@ export interface UploadLogoResponse {
   id: string
 }
 
+export interface TranslationWorkflowInput {
+  documentId: string
+  serviceName: string
+  fields?: string[]
+}
+
+export interface TranslationData {
+  locale?: string
+  slug?: string
+  name?: string
+  url?: string
+  abstract?: string
+  description?: string
+  functionality?: string
+  shortfacts?: string
+  pricing?: string
+  tags?: string[]
+  youtube_video?: string
+  youtube_title?: string
+  top?: boolean
+  publishdate?: string
+  reviewCount?: number
+  averageRating?: number
+}
+
+export interface StrapiServiceDetail extends StrapiService {
+  abstract?: string
+  description?: string
+  functionality?: string
+  shortfacts?: string
+  pricing?: string
+  tags?: StrapiTag[]
+  youtube_video?: string
+  youtube_title?: string
+  top?: boolean
+  publishdate?: string
+  reviewCount?: number
+  averageRating?: number
+}
+
+export interface StrapiServiceDetailResponse {
+  data: {
+    services: StrapiServiceDetail[]
+  }
+}
+

@@ -30,6 +30,7 @@
     "test:video": "tsx src/test/test-video.ts",
     
     "test:workflow:service": "tsx src/test/test-service-workflow.ts",
+    "test:workflow:translation": "tsx src/test/test-translation-workflow.ts",
     
     "lint": "echo 'No linting configured'",
     "test": "echo 'No tests configured'",

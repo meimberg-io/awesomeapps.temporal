@@ -1,12 +1,13 @@
 import { log } from '@temporalio/activity'
-import { fetchBrandLogo } from './youtube'
 import type {
   ServiceData,
   StrapiServiceResponse,
   StrapiTagResponse,
   StrapiCreateServiceResponse,
   StrapiCreateTagResponse,
-  UploadLogoResponse
+  UploadLogoResponse,
+  StrapiServiceDetailResponse,
+  TranslationData
 } from '../types/service'
 
 const STRAPI_API_URL = process.env.STRAPI_API_URL || 'https://awesomeapps-strapi.meimberg.io/api'
@@ -52,12 +53,12 @@ async function strapiGraphQL(query: string): Promise<any> {
     throw new Error(`Strapi GraphQL error: ${response.status} ${response.statusText} - ${errorText}`)
   }
 
-  const result = await response.json()
+  const result = await response.json() as any
   if (result.errors) {
     throw new Error(`Strapi GraphQL errors: ${JSON.stringify(result.errors)}`)
   }
 
-  return result.data
+  return result.data as StrapiServiceResponse
 }
 
 export async function checkServiceExists(slug: string): Promise<StrapiServiceResponse> {
@@ -177,48 +178,115 @@ export async function uploadLogo(file: Buffer, filename: string): Promise<Upload
     throw new Error(`Logo upload error: ${response.status} ${response.statusText} - ${errorText}`)
   }
 
-  const result = await response.json()
+  const result = await response.json() as any
   return {
     id: result[0]?.id || result.id
-  }
+  } as UploadLogoResponse
 }
 
+// TODO: Implement fetchBrandLogo in youtube.ts or separate brandfetch activity
 export async function fetchAndUploadLogo(domain: string): Promise<UploadLogoResponse | null> {
-  log.info('Fetching and uploading logo', { domain })
+  log.info('Fetching and uploading logo - NOT IMPLEMENTED', { domain })
+  log.warn('fetchBrandLogo not implemented yet')
+  return null
   
-  try {
-    const brandData = await fetchBrandLogo(domain)
-    
-    if (!brandData.logo_png) {
-      log.warn('No logo found for domain', { domain })
-      return null
-    }
-    
-    const logoResponse = await fetch(brandData.logo_png)
-    if (!logoResponse.ok) {
-      throw new Error(`Failed to fetch logo: ${logoResponse.status} ${logoResponse.statusText}`)
-    }
-    
-    const logoBuffer = Buffer.from(await logoResponse.arrayBuffer())
-    const uploadResult = await uploadLogo(logoBuffer, `${domain}-logo.png`)
-    
-    return uploadResult
-  } catch (error) {
-    log.error('Failed to fetch and upload logo', { error, domain })
-    throw error
-  }
+  // try {
+  //   const brandData = await fetchBrandLogo(domain)
+  //   
+  //   if (!brandData.logo_png) {
+  //     log.warn('No logo found for domain', { domain })
+  //     return null
+  //   }
+  //   
+  //   const logoResponse = await fetch(brandData.logo_png)
+  //   if (!logoResponse.ok) {
+  //     throw new Error(`Failed to fetch logo: ${logoResponse.status} ${logoResponse.statusText}`)
+  //   }
+  //   
+  //   const logoBuffer = Buffer.from(await logoResponse.arrayBuffer())
+  //   const uploadResult = await uploadLogo(logoBuffer, `${domain}-logo.png`)
+  //   
+  //   return uploadResult
+  // } catch (error) {
+  //   log.error('Failed to fetch and upload logo', { error, domain })
+  //   throw error
+  // }
 }
 
-export async function triggerTranslationWorkflow(documentId: string, serviceName: string): Promise<void> {
-  log.info('Triggering translation workflow', { documentId, serviceName })
+export async function getServiceByDocumentId(documentId: string): Promise<StrapiServiceDetailResponse> {
+  log.info('Fetching service by documentId', { documentId })
+
+  const query = `
+    query GetServiceByDocumentId($documentId: ID!) {
+      services(filters: { documentId: { eq: $documentId } }) {
+        documentId
+        name
+        slug
+        url
+        abstract
+        description
+        pricing
+        functionality
+        shortfacts
+        youtube_video
+        youtube_title
+        top
+        publishdate
+        reviewCount
+        averageRating
+        tags {
+          documentId
+          name
+        }
+      }
+    }
+  `
+
+  const variables = { documentId }
+
+  const response = await fetch(STRAPI_GRAPHQL_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${STRAPI_API_TOKEN}`
+    },
+    body: JSON.stringify({ query, variables })
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`Strapi GraphQL error: ${response.status} ${response.statusText} - ${errorText}`)
+  }
+
+  return await response.json() as StrapiServiceDetailResponse
+}
+
+export async function updateServiceTranslation(documentId: string, translationData: TranslationData): Promise<void> {
+  log.info('Updating service translation', { documentId, locale: 'de' })
+
+  const endpoint = `/services/${documentId}?locale=de`
+
+  // Remove undefined/null/empty values (like n8n does)
+  const cleanData: Record<string, any> = {}
+  Object.entries(translationData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && (Array.isArray(value) ? value.length > 0 : true)) {
+      cleanData[key] = value
+    }
+  })
+
+  await strapiRequest(endpoint, {
+    method: 'PUT',
+    body: JSON.stringify({ data: cleanData })
+  })
+
+  log.info('Service translation updated successfully', { documentId, locale: 'de' })
+}
+
+export async function triggerTranslationWorkflow(documentId: string, serviceName: string, fields?: string[]): Promise<void> {
+  log.info('Triggering translation workflow', { documentId, serviceName, fields })
   
   const { Connection, Client } = await import('@temporalio/client')
-  const translationWorkflowId = process.env.TRANSLATION_WORKFLOW_ID
-  
-  if (!translationWorkflowId) {
-    log.warn('TRANSLATION_WORKFLOW_ID not set, skipping translation workflow')
-    return
-  }
+  const { translationWorkflow } = await import('../workflows/translation')
   
   try {
     const connection = await Connection.connect({
@@ -230,10 +298,11 @@ export async function triggerTranslationWorkflow(documentId: string, serviceName
       namespace: process.env.TEMPORAL_NAMESPACE || 'default'
     })
     
-    await client.workflow.start(translationWorkflowId, {
+    await client.workflow.start(translationWorkflow, {
       args: [{
-        service: serviceName,
-        newtags: false
+        documentId,
+        serviceName,
+        fields: fields || []
       }],
       taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'awesomeapps-tasks',
       workflowId: `translate-${documentId}-${Date.now()}`

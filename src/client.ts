@@ -1,6 +1,7 @@
 import { Connection, Client } from '@temporalio/client'
 import { serviceWorkflow } from './workflows/service'
-import type { ServiceWorkflowInput } from './types/service'
+import { translationWorkflow } from './workflows/translation'
+import type { ServiceWorkflowInput, TranslationWorkflowInput } from './types/service'
 
 export async function createClient() {
   const connection = await Connection.connect({
@@ -28,6 +29,29 @@ export async function startServiceWorkflow(input: ServiceWorkflowInput) {
     workflowId: handle.workflowId,
     runId: handle.firstExecutionRunId,
     service: input.service
+  })
+
+  const result = await handle.result()
+
+  await connection.close()
+
+  return result
+}
+
+export async function startTranslationWorkflow(input: TranslationWorkflowInput) {
+  const { client, connection } = await createClient()
+
+  const handle = await client.workflow.start(translationWorkflow, {
+    args: [input],
+    taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'awesomeapps-tasks',
+    workflowId: `translate-${input.documentId}-${Date.now()}`
+  })
+
+  console.log('Translation workflow started', {
+    workflowId: handle.workflowId,
+    runId: handle.firstExecutionRunId,
+    serviceName: input.serviceName,
+    documentId: input.documentId
   })
 
   const result = await handle.result()
