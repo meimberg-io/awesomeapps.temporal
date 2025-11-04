@@ -1,18 +1,11 @@
 import {log} from '@temporalio/activity'
 import OpenAI from 'openai'
+import {config} from '../config/env'
 import type {YouTubeSearchResult, YouTubeVideo} from '../types/service'
 import {prompts} from '../lib/prompts'
 
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || ''
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
-
-if (!YOUTUBE_API_KEY) {
-    console.warn('YOUTUBE_API_KEY not set')
-}
-
-if (!OPENAI_API_KEY) {
-    console.warn('OPENAI_API_KEY not set')
-}
+const YOUTUBE_API_KEY = config.youtube.apiKey
+const OPENAI_API_KEY = config.ai.openaiApiKey
 
 const openai = new OpenAI({
     apiKey: OPENAI_API_KEY

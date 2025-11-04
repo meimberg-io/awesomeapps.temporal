@@ -1,21 +1,9 @@
-import { log } from '@temporalio/activity'
 import OpenAI from 'openai'
+import { config } from '../config/env'
 import type { YouTubeVideo } from '../types/service'
 import { prompts } from '../lib/prompts'
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
-
-function safeLogWarn(message: string) {
-  try {
-    log.warn(message)
-  } catch {
-    console.warn(`[Activity] ${message}`)
-  }
-}
-
-if (!OPENAI_API_KEY) {
-  safeLogWarn('OPENAI_API_KEY not set')
-}
+const OPENAI_API_KEY = config.ai.openaiApiKey
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
 

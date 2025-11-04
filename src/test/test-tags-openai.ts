@@ -1,4 +1,3 @@
-import './setup'
 import {chooseTags} from '../activities/openai'
 import {getAllTags} from '../activities/strapi'
 import {testActivityWithTwoParams} from './test-utils'

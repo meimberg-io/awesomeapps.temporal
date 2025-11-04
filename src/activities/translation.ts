@@ -1,11 +1,8 @@
 import {log} from '@temporalio/activity'
 import OpenAI from 'openai'
+import {config} from '../config/env'
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
-
-if (!OPENAI_API_KEY) {
-  console.warn('OPENAI_API_KEY not set')
-}
+const OPENAI_API_KEY = config.ai.openaiApiKey
 
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY

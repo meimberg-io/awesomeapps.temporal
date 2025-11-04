@@ -1,12 +1,11 @@
-import './setup'
 import {startServiceWorkflow} from '../client'
 
 async function testServiceWorkflow() {
   console.log('🚀 Starting service workflow test...\n')
   
   const result = await startServiceWorkflow({
-    service: 'Youtube',
-    fields: ['url', 'abstract', 'description'],
+    service: 'Discord',
+    fields: ['url', 'abstract', 'description', 'functionality', 'shortfacts', 'pricing', 'tags', 'video'],
     aiProvider: 'openai'
   })
   

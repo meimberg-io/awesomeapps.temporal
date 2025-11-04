@@ -1,5 +1,5 @@
-import 'dotenv/config'
 import { NativeConnection, Worker } from '@temporalio/worker'
+import { config, validateConfig } from './config/env'
 import * as strapiActivities from './activities/strapi'
 import * as geminiActivities from './activities/gemini'
 import * as openaiActivities from './activities/openai'
@@ -15,25 +15,24 @@ const activities = {
 }
 
 async function run() {
+  validateConfig()
+
   const connection = await NativeConnection.connect({
-    address: process.env.TEMPORAL_ADDRESS || 'localhost:7233'
+    address: config.temporal.address
   })
 
   const worker = await Worker.create({
     connection,
-    namespace: process.env.TEMPORAL_NAMESPACE || 'default',
-    taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'awesomeapps-tasks',
+    namespace: config.temporal.namespace,
+    taskQueue: config.temporal.taskQueue,
     workflowsPath: require.resolve('./workflows'),
     activities: activities as any,
-    maxConcurrentActivityTaskExecutions: parseInt(
-      process.env.MAX_CONCURRENT_ACTIVITIES || '10',
-      10
-    )
+    maxConcurrentActivityTaskExecutions: config.temporal.maxConcurrentActivities
   })
 
   console.log('Worker started', {
-    namespace: process.env.TEMPORAL_NAMESPACE || 'default',
-    taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'awesomeapps-tasks'
+    namespace: config.temporal.namespace,
+    taskQueue: config.temporal.taskQueue
   })
 
   await worker.run()

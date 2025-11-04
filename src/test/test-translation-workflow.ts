@@ -1,4 +1,3 @@
-import './setup'
 import {startTranslationWorkflow} from '../client'
 
 async function testTranslationWorkflow() {

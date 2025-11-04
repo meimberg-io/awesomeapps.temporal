@@ -1,4 +1,3 @@
-import './setup'
 import {generatePricing} from '../activities/gemini'
 import {testActivity} from './test-utils'
 

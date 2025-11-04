@@ -1,4 +1,3 @@
-import './setup'
 import {
   generateAbstract,
   generateURL,

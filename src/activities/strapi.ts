@@ -1,4 +1,5 @@
 import { log } from '@temporalio/activity'
+import { config } from '../config/env'
 import type {
   ServiceData,
   StrapiServiceResponse,
@@ -10,13 +11,9 @@ import type {
   TranslationData
 } from '../types/service'
 
-const STRAPI_API_URL = process.env.STRAPI_API_URL || 'https://awesomeapps-strapi.meimberg.io/api'
-const STRAPI_GRAPHQL_URL = process.env.STRAPI_GRAPHQL_URL || 'https://awesomeapps-strapi.meimberg.io/graphql'
-const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN || ''
-
-if (!STRAPI_API_TOKEN) {
-  console.warn('STRAPI_API_TOKEN not set')
-}
+const STRAPI_API_URL = config.strapi.apiUrl
+const STRAPI_GRAPHQL_URL = config.strapi.graphqlUrl
+const STRAPI_API_TOKEN = config.strapi.apiToken
 
 async function strapiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
   const url = endpoint.startsWith('http') ? endpoint : `${STRAPI_API_URL}${endpoint}`

@@ -1,20 +1,8 @@
-import { log } from '@temporalio/activity'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { config } from '../config/env'
 import { prompts } from '../lib/prompts'
 
-const GOOGLE_GEMINI_API_KEY = process.env.GOOGLE_GEMINI_API_KEY || ''
-
-function safeLogWarn(message: string) {
-  try {
-    log.warn(message)
-  } catch {
-    console.warn(`[Activity] ${message}`)
-  }
-}
-
-if (!GOOGLE_GEMINI_API_KEY) {
-  safeLogWarn('GOOGLE_GEMINI_API_KEY not set')
-}
+const GOOGLE_GEMINI_API_KEY = config.ai.geminiApiKey
 
 const gemini = new GoogleGenerativeAI(GOOGLE_GEMINI_API_KEY)
 

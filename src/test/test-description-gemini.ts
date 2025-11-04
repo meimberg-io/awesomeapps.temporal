@@ -1,4 +1,3 @@
-import './setup'
 import {generateDescription} from '../activities/gemini'
 import {testActivity} from './test-utils'
 

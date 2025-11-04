@@ -1,4 +1,3 @@
-import './setup'
 import {getYouTubeVideo} from '../activities/youtube'
 import {testYouTubeVideoActivity} from './test-utils'
 

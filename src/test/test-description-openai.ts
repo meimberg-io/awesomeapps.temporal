@@ -1,4 +1,3 @@
-import './setup'
 import {generateDescription} from '../activities/openai'
 import {testActivity} from './test-utils'
 
