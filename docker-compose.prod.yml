@@ -5,11 +5,82 @@
 version: "3.9"
 
 services:
+  ${PROJECT_NAME}-postgresql:
+    image: postgres:15-alpine
+    container_name: ${PROJECT_NAME}-postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    volumes:
+      - ${PROJECT_NAME}-postgres-data:/var/lib/postgresql/data
+    networks:
+      - ${PROJECT_NAME}-temporal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ${PROJECT_NAME}-server:
+    image: temporalio/auto-setup:latest
+    container_name: ${PROJECT_NAME}-server
+    restart: unless-stopped
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=${PROJECT_NAME}-postgresql
+      - SKIP_DB_CREATE=false
+      - SKIP_DEFAULT_NAMESPACE_CREATION=false
+      - BIND_ON_IP=0.0.0.0
+    depends_on:
+      ${PROJECT_NAME}-postgresql:
+        condition: service_healthy
+    networks:
+      - ${PROJECT_NAME}-temporal
+    healthcheck:
+      test: ["CMD", "tctl", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ${PROJECT_NAME}-ui:
+    image: temporalio/ui:latest
+    container_name: ${PROJECT_NAME}-ui
+    restart: unless-stopped
+    environment:
+      - TEMPORAL_ADDRESS=${PROJECT_NAME}-server:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    depends_on:
+      ${PROJECT_NAME}-server:
+        condition: service_healthy
+    networks:
+      - ${PROJECT_NAME}-temporal
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.${PROJECT_NAME}-ui.rule=Host(`${UI_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}-ui.entrypoints=websecure"
+      - "traefik.http.routers.${PROJECT_NAME}-ui.tls.certresolver=le"
+      - "traefik.http.services.${PROJECT_NAME}-ui.loadbalancer.server.port=8080"
+
   ${PROJECT_NAME}:
     image: ${DOCKER_IMAGE}
     container_name: ${PROJECT_NAME}
     restart: unless-stopped
     env_file: .env
+    environment:
+      - TEMPORAL_ADDRESS=${PROJECT_NAME}-server:7233
+    depends_on:
+      ${PROJECT_NAME}-server:
+        condition: service_healthy
+    networks:
+      - ${PROJECT_NAME}-temporal
+      - traefik
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
@@ -17,13 +88,14 @@ services:
       - "traefik.http.routers.${PROJECT_NAME}.entrypoints=websecure"
       - "traefik.http.routers.${PROJECT_NAME}.tls.certresolver=le"
       - "traefik.http.services.${PROJECT_NAME}.loadbalancer.server.port=8080"
-    networks:
-      - traefik
-      - temporal
+
+volumes:
+  ${PROJECT_NAME}-postgres-data:
 
 networks:
+  ${PROJECT_NAME}-temporal:
+    name: ${PROJECT_NAME}-temporal
+    driver: bridge
   traefik:
-    external: true
-  temporal:
     external: true
 

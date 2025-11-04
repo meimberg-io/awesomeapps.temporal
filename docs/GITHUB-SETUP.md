@@ -8,10 +8,10 @@ Initial configuration required for automatic deployment.
 
 | Name | Value | Description |
 |------|-------|-------------|
-| `APP_DOMAIN` | `awesomeapps-temporal.meimberg.io` | Application domain |
+| `APP_DOMAIN` | `awesomeapps-temporal.meimberg.io` | Application domain (worker) |
+| `UI_DOMAIN` | `temporal.meimberg.io` | Temporal UI domain |
 | `SERVER_HOST` | `hc-02.meimberg.io` | Server hostname |
 | `SERVER_USER` | `deploy` | SSH user for deployment |
-| `TEMPORAL_ADDRESS` | `temporal-server:7233` | Temporal server address |
 | `TEMPORAL_NAMESPACE` | `default` | Temporal namespace |
 | `TEMPORAL_TASK_QUEUE` | `awesomeapps-tasks` | Task queue name |
 | `WORKER_CONCURRENCY` | `10` | Worker concurrency |
@@ -59,9 +59,10 @@ Copy entire output including `-----BEGIN` and `-----END` lines.
 
 # DNS Configuration
 
-**Add A record:**
+**Add CNAME records:**
 ```
 awesomeapps-temporal.meimberg.io  →  CNAME  →  hc-02.meimberg.io
+temporal.meimberg.io              →  CNAME  →  hc-02.meimberg.io
 ```
 
 # Server Infrastructure
@@ -95,35 +96,15 @@ ansible-playbook -i inventory/hosts.ini playbooks/site.yml --vault-password-file
 
 # Temporal Server Setup
 
-The worker requires a running Temporal server. You have two options:
+**The deployment includes everything:** PostgreSQL, Temporal Server, Temporal UI, and the worker - all in one docker-compose file, just like it works locally.
 
-## Option 1: Use Existing Temporal Server (Recommended for Production)
+The deployment automatically sets up:
+- **PostgreSQL database** - Temporal data storage
+- **Temporal server** - Core Temporal service
+- **Temporal UI** - Web interface at https://temporal.meimberg.io
+- **Worker** - Your awesomeapps worker
 
-If you already have a Temporal server running on the same Docker host:
-
-1. Ensure the Temporal server is running
-2. Make sure the `temporal` Docker network exists:
-   ```bash
-   docker network create temporal
-   ```
-3. Set `TEMPORAL_ADDRESS` to `temporal-server:7233` (or your server's container name)
-
-## Option 2: Deploy Temporal Server Infrastructure
-
-If you need to deploy the full Temporal stack (PostgreSQL + Temporal Server + UI):
-
-```bash
-# On the server
-cd /srv/temporal-infrastructure
-docker compose up -d
-```
-
-This requires a separate `docker-compose.yml` with:
-- PostgreSQL database
-- Temporal server
-- Temporal UI (optional)
-
-See [operations.md](operations.md) for Temporal infrastructure details.
+No separate infrastructure setup needed - it's all automated!
 
 
 
@@ -143,9 +124,9 @@ git push origin main
 1. ✅ Docker image builds
 2. ✅ Pushes to GitHub Container Registry
 3. ✅ SSHs to server
-4. ✅ Deploys worker container with Traefik labels
-5. ✅ Worker connects to Temporal server
-6. ✅ App live at https://awesomeapps-temporal.meimberg.io
+4. ✅ Deploys full stack (PostgreSQL + Temporal Server + UI + Worker)
+5. ✅ Worker live at https://awesomeapps-temporal.meimberg.io
+6. ✅ Temporal UI live at https://temporal.meimberg.io
 
 # Additional Information
 
@@ -153,12 +134,11 @@ git push origin main
 
 Before first deployment:
 
-- [ ] GitHub Variables added: `APP_DOMAIN`, `SERVER_HOST`, `SERVER_USER`, Temporal config, API URLs
+- [ ] GitHub Variables added: `APP_DOMAIN`, `UI_DOMAIN`, `SERVER_HOST`, `SERVER_USER`, Temporal config, API URLs
 - [ ] GitHub Secrets added: `SSH_PRIVATE_KEY`, API keys
-- [ ] DNS A record configured
+- [ ] DNS A records configured (worker + UI)
 - [ ] Server infrastructure deployed via Ansible
-- [ ] Temporal server is running and accessible
-- [ ] Docker networks exist: `traefik` and `temporal`
+- [ ] `traefik` network exists (created by Ansible)
 - [ ] Can SSH to server: `ssh deploy@hc-02.meimberg.io`
 
 **Estimated setup time:** 20-25 minutes

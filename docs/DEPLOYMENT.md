@@ -18,7 +18,7 @@ Watch: https://github.com/meimberg-io/awesomeapps.temporal/actions
 2. Build Docker image
 3. Push to GitHub Container Registry
 4. Copy `docker-compose.prod.yml` to server
-5. SSH to server and run `envsubst` to substitute variables
+5. SSH to server, create networks if needed, and run `envsubst` to substitute variables
 6. Pull image and restart container
 
 **File:** `.github/workflows/deploy.yml`
@@ -35,11 +35,12 @@ Watch: https://github.com/meimberg-io/awesomeapps.temporal/actions
 
 ## Prerequisites
 
-The Temporal worker requires:
-- ✅ Temporal Server running and accessible
+The deployment requires:
 - ✅ Traefik reverse proxy configured
 - ✅ `deploy` user with SSH access
-- ✅ Docker networks: `traefik` and `temporal`
+- ✅ `traefik` network (created by Ansible)
+
+**Note:** The deployment includes the complete Temporal stack (PostgreSQL, Temporal Server, Temporal UI, Worker) in a single docker-compose file.
 
 ## Operations
 
@@ -65,9 +66,24 @@ ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "cd /srv/projects/awesomeapps-tempo
 ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker logs awesomeapps-temporal --tail 100"
 ```
 
-**Check Temporal connection:**
+**Check all containers:**
 ```bash
-ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker exec awesomeapps-temporal nc -zv temporal-server 7233"
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker ps | grep awesomeapps-temporal"
+```
+
+**Check Temporal server logs:**
+```bash
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker logs awesomeapps-temporal-server --tail 50"
+```
+
+**Check database logs:**
+```bash
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker logs awesomeapps-temporal-postgresql --tail 50"
+```
+
+**Check Temporal UI logs:**
+```bash
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker logs awesomeapps-temporal-ui --tail 50"
 ```
 
 **Traefik routing:**
@@ -102,8 +118,8 @@ curl -I https://awesomeapps-temporal.meimberg.io/
 **Environment Variables (GitHub Variables):**
 - `SERVER_HOST` - Server hostname (hc-02.meimberg.io)
 - `SERVER_USER` - SSH user (deploy)
-- `APP_DOMAIN` - Application domain (awesomeapps-temporal.meimberg.io)
-- `TEMPORAL_ADDRESS` - Temporal server address (temporal-server:7233)
+- `APP_DOMAIN` - Worker domain (awesomeapps-temporal.meimberg.io)
+- `UI_DOMAIN` - Temporal UI domain (temporal.meimberg.io)
 - `TEMPORAL_NAMESPACE` - Temporal namespace (default)
 - `TEMPORAL_TASK_QUEUE` - Task queue name (awesomeapps-tasks)
 - `WORKER_CONCURRENCY` - Worker concurrency (10)
