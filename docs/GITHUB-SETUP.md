@@ -8,8 +8,7 @@ Initial configuration required for automatic deployment.
 
 | Name | Value | Description |
 |------|-------|-------------|
-| `APP_DOMAIN` | `awesomeapps-temporal.meimberg.io` | Application domain (worker) |
-| `UI_DOMAIN` | `temporal.meimberg.io` | Temporal UI domain |
+| `APP_DOMAIN` | `temporal.meimberg.io` | Temporal UI domain |
 | `SERVER_HOST` | `hc-02.meimberg.io` | Server hostname |
 | `SERVER_USER` | `deploy` | SSH user for deployment |
 | `TEMPORAL_NAMESPACE` | `default` | Temporal namespace |
@@ -59,11 +58,12 @@ Copy entire output including `-----BEGIN` and `-----END` lines.
 
 # DNS Configuration
 
-**Add CNAME records:**
+**Add CNAME record:**
 ```
-awesomeapps-temporal.meimberg.io  →  CNAME  →  hc-02.meimberg.io
-temporal.meimberg.io              →  CNAME  →  hc-02.meimberg.io
+temporal.meimberg.io  →  CNAME  →  hc-02.meimberg.io
 ```
+
+**Note:** The worker runs in the background and doesn't serve HTTP traffic, so only the Temporal UI needs a domain.
 
 # Server Infrastructure
 
@@ -125,8 +125,8 @@ git push origin main
 2. ✅ Pushes to GitHub Container Registry
 3. ✅ SSHs to server
 4. ✅ Deploys full stack (PostgreSQL + Temporal Server + UI + Worker)
-5. ✅ Worker live at https://awesomeapps-temporal.meimberg.io
-6. ✅ Temporal UI live at https://temporal.meimberg.io
+5. ✅ Temporal UI live at https://temporal.meimberg.io
+6. ✅ Worker running in background (no web interface)
 
 # Additional Information
 
@@ -134,9 +134,9 @@ git push origin main
 
 Before first deployment:
 
-- [ ] GitHub Variables added: `APP_DOMAIN`, `UI_DOMAIN`, `SERVER_HOST`, `SERVER_USER`, Temporal config, API URLs
+- [ ] GitHub Variables added: `APP_DOMAIN`, `SERVER_HOST`, `SERVER_USER`, Temporal config, API URLs
 - [ ] GitHub Secrets added: `SSH_PRIVATE_KEY`, API keys
-- [ ] DNS A records configured (worker + UI)
+- [ ] DNS CNAME record configured for Temporal UI
 - [ ] Server infrastructure deployed via Ansible
 - [ ] `traefik` network exists (created by Ansible)
 - [ ] Can SSH to server: `ssh deploy@hc-02.meimberg.io`

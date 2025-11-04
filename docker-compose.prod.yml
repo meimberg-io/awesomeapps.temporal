@@ -63,7 +63,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
-      - "traefik.http.routers.${PROJECT_NAME}-ui.rule=Host(`${UI_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}-ui.rule=Host(`${APP_DOMAIN}`)"
       - "traefik.http.routers.${PROJECT_NAME}-ui.entrypoints=websecure"
       - "traefik.http.routers.${PROJECT_NAME}-ui.tls.certresolver=le"
       - "traefik.http.services.${PROJECT_NAME}-ui.loadbalancer.server.port=8080"
@@ -80,14 +80,6 @@ services:
         condition: service_healthy
     networks:
       - ${PROJECT_NAME}-temporal
-      - traefik
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik"
-      - "traefik.http.routers.${PROJECT_NAME}.rule=Host(`${APP_DOMAIN}`)"
-      - "traefik.http.routers.${PROJECT_NAME}.entrypoints=websecure"
-      - "traefik.http.routers.${PROJECT_NAME}.tls.certresolver=le"
-      - "traefik.http.services.${PROJECT_NAME}.loadbalancer.server.port=8080"
 
 volumes:
   ${PROJECT_NAME}-postgres-data:

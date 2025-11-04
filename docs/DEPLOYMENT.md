@@ -118,8 +118,7 @@ curl -I https://awesomeapps-temporal.meimberg.io/
 **Environment Variables (GitHub Variables):**
 - `SERVER_HOST` - Server hostname (hc-02.meimberg.io)
 - `SERVER_USER` - SSH user (deploy)
-- `APP_DOMAIN` - Worker domain (awesomeapps-temporal.meimberg.io)
-- `UI_DOMAIN` - Temporal UI domain (temporal.meimberg.io)
+- `APP_DOMAIN` - Temporal UI domain (temporal.meimberg.io)
 - `TEMPORAL_NAMESPACE` - Temporal namespace (default)
 - `TEMPORAL_TASK_QUEUE` - Task queue name (awesomeapps-tasks)
 - `WORKER_CONCURRENCY` - Worker concurrency (10)

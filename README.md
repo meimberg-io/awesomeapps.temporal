@@ -158,12 +158,13 @@ See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for details.
 
 ## Production
 
-**Worker URL:** https://awesomeapps-temporal.meimberg.io
 **Temporal UI:** https://temporal.meimberg.io
 **Server:** hc-02.meimberg.io
 **SSH:** `ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io`
 
-**Note:** The production deployment includes the complete Temporal stack (PostgreSQL, Temporal Server, UI, Worker) in a single docker-compose file - identical to local development.
+**Note:** 
+- The production deployment includes the complete Temporal stack (PostgreSQL, Temporal Server, UI, Worker) in a single docker-compose file - identical to local development.
+- The worker runs in the background and doesn't serve HTTP traffic. Use the Temporal UI to monitor workflows and activities.
 
 ## 🔄 Migration from n8n
 

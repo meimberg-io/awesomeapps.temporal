@@ -53,7 +53,6 @@ jobs:
     env:
       PROJECT_NAME: awesomeapps-temporal
       APP_DOMAIN: ${{ vars.APP_DOMAIN }}
-      UI_DOMAIN: ${{ vars.UI_DOMAIN }}
       DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
       
       # Temporal Configuration
@@ -93,7 +92,7 @@ jobs:
         host: ${{ vars.SERVER_HOST }}
         username: ${{ vars.SERVER_USER || 'deploy' }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: PROJECT_NAME,GITHUB_TOKEN,DOCKER_IMAGE,APP_DOMAIN,UI_DOMAIN,TEMPORAL_NAMESPACE,TEMPORAL_TASK_QUEUE,WORKER_CONCURRENCY,MAX_CONCURRENT_ACTIVITIES,STRAPI_API_URL,STRAPI_GRAPHQL_URL,STRAPI_API_TOKEN,OPENAI_API_KEY,GOOGLE_GEMINI_API_KEY,YOUTUBE_API_KEY,TRANSLATION_WORKFLOW_ID
+        envs: PROJECT_NAME,GITHUB_TOKEN,DOCKER_IMAGE,APP_DOMAIN,TEMPORAL_NAMESPACE,TEMPORAL_TASK_QUEUE,WORKER_CONCURRENCY,MAX_CONCURRENT_ACTIVITIES,STRAPI_API_URL,STRAPI_GRAPHQL_URL,STRAPI_API_TOKEN,OPENAI_API_KEY,GOOGLE_GEMINI_API_KEY,YOUTUBE_API_KEY,TRANSLATION_WORKFLOW_ID
         script: |
           set -e
           
@@ -139,7 +138,6 @@ jobs:
           export PROJECT_NAME="${PROJECT_NAME}"
           export DOCKER_IMAGE="${DOCKER_IMAGE}"
           export APP_DOMAIN="${APP_DOMAIN}"
-          export UI_DOMAIN="${UI_DOMAIN}"
           
           envsubst < docker-compose.prod.yml > docker-compose.yml
           
@@ -156,8 +154,8 @@ jobs:
           # Verify deployment
           if docker ps | grep -q ${PROJECT_NAME}; then
             echo "✅ ${PROJECT_NAME} deployed successfully!"
-            echo "🌐 Worker accessible at: https://${APP_DOMAIN}"
-            echo "🌐 Temporal UI accessible at: https://${UI_DOMAIN}"
+            echo "🌐 Temporal UI: https://${APP_DOMAIN}"
+            echo "ℹ️  Worker running in background (no web interface)"
           else
             echo "❌ Deployment failed - container not running"
             docker logs ${PROJECT_NAME}
