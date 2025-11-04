@@ -8,7 +8,8 @@ import type {
   StrapiCreateTagResponse,
   UploadLogoResponse,
   StrapiServiceDetailResponse,
-  TranslationData
+  TranslationData,
+  NewServicesResponse
 } from '../types/service'
 
 const STRAPI_API_URL = config.strapi.apiUrl
@@ -311,5 +312,52 @@ export async function triggerTranslationWorkflow(documentId: string, serviceName
     log.error('Failed to trigger translation workflow', { error, documentId })
     throw error
   }
+}
+
+export async function getNewServices(status: 'new' | 'pending'): Promise<NewServicesResponse> {
+  log.info('Fetching new services', { status })
+  
+  const query = `
+    query GetNewServices {
+      newServices(filters: { n8nstatus: { eq: "${status}" } }) {
+        documentId
+        slug
+        field
+      }
+    }
+  `
+
+  const data = await strapiGraphQL(query)
+  
+  return {
+    data: {
+      newServices: data.newServices || []
+    }
+  }
+}
+
+export async function updateNewServiceStatus(documentId: string, status: 'new' | 'pending' | 'error'): Promise<void> {
+  log.info('Updating new service status', { documentId, status })
+  
+  await strapiRequest(`/new-services/${documentId}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      data: {
+        n8nstatus: status
+      }
+    })
+  })
+
+  log.info('New service status updated successfully', { documentId, status })
+}
+
+export async function deleteNewService(documentId: string): Promise<void> {
+  log.info('Deleting new service', { documentId })
+  
+  await strapiRequest(`/new-services/${documentId}`, {
+    method: 'DELETE'
+  })
+
+  log.info('New service deleted successfully', { documentId })
 }
 

@@ -126,3 +126,15 @@ export interface StrapiServiceDetailResponse {
   }
 }
 
+export interface NewService {
+  documentId: string
+  slug: string
+  field?: string
+}
+
+export interface NewServicesResponse {
+  data: {
+    newServices: NewService[]
+  }
+}
+

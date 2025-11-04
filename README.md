@@ -44,11 +44,18 @@ Open http://localhost:8080
 ```
 src/
 ├── workflows/      # Workflow definitions
-│   ├── example.ts
+│   ├── service.ts
+│   ├── translation.ts
+│   ├── scheduler.ts
 │   └── index.ts
 ├── activities/     # Activity implementations
-│   ├── example.ts
+│   ├── strapi.ts
+│   ├── gemini.ts
+│   ├── openai.ts
+│   ├── youtube.ts
+│   ├── translation.ts
 │   └── index.ts
+├── test/           # Test files
 ├── client.ts       # Temporal client for starting workflows
 └── worker.ts       # Worker that executes workflows
 ```
@@ -64,22 +71,55 @@ Environment variables (see `env.example`):
 
 ## 🏃 Running Workflows
 
+### Available Workflows
+
+#### Service Workflow
+Processes a service by generating content using AI (Gemini or OpenAI), fetching data, and storing it in Strapi.
+
+```bash
+npm run test:workflow:service
+```
+
+#### Translation Workflow
+Translates service content to German locale.
+
+```bash
+npm run test:workflow:translation
+```
+
+#### Scheduler Workflow
+Queue processor that monitors the Strapi `new-services` table and processes entries one by one:
+- Checks for pending services (skips if busy)
+- Gets next "new" service
+- Updates status to "pending"
+- Executes service workflow
+- Deletes on success or marks as "error" on failure
+
+```bash
+npm run test:workflow:scheduler
+```
+
+**To run continuously**, set up a Temporal Schedule. See [docs/operations.md](docs/operations.md) for detailed instructions on using Temporal UI, CLI, or code to create a schedule.
+
 ### From code:
 
 ```typescript
-import { startExampleWorkflow } from './src/client'
+import { startServiceWorkflow } from './src/client'
 
-const result = await startExampleWorkflow('World')
-console.log(result) // "Hello, World!"
+const result = await startServiceWorkflow({
+  service: 'Discord',
+  fields: ['url', 'abstract', 'description'],
+  aiProvider: 'openai'
+})
 ```
 
 ### Using Temporal CLI:
 
 ```bash
 temporal workflow start \
-  --type exampleWorkflow \
+  --type serviceWorkflow \
   --task-queue awesomeapps-tasks \
-  --input '["World"]'
+  --input '[{"service":"Discord","fields":["url"],"aiProvider":"gemini"}]'
 ```
 
 ## 🐳 Docker

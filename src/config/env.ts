@@ -29,23 +29,19 @@ function getRequired(key: string): string {
   return value
 }
 
-function getOptional(key: string, defaultValue: string): string {
-  return process.env[key] || defaultValue
-}
-
 export const config: Config = {
   temporal: {
-    address: getOptional('TEMPORAL_ADDRESS', 'localhost:7233'),
-    namespace: getOptional('TEMPORAL_NAMESPACE', 'default'),
-    taskQueue: getOptional('TEMPORAL_TASK_QUEUE', 'awesomeapps-tasks'),
+    address: getRequired('TEMPORAL_ADDRESS'),
+    namespace: getRequired('TEMPORAL_NAMESPACE'),
+    taskQueue: getRequired('TEMPORAL_TASK_QUEUE'),
     maxConcurrentActivities: parseInt(
-      getOptional('MAX_CONCURRENT_ACTIVITIES', '10'),
+      getRequired('MAX_CONCURRENT_ACTIVITIES'),
       10
     )
   },
   strapi: {
-    apiUrl: getOptional('STRAPI_API_URL', 'https://awesomeapps-strapi.meimberg.io/api'),
-    graphqlUrl: getOptional('STRAPI_GRAPHQL_URL', 'https://awesomeapps-strapi.meimberg.io/graphql'),
+    apiUrl: getRequired('STRAPI_API_URL'),
+    graphqlUrl: getRequired('STRAPI_GRAPHQL_URL'),
     apiToken: getRequired('STRAPI_API_TOKEN')
   },
   ai: {

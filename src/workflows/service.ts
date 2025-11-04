@@ -67,7 +67,7 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
 
 
     if (shouldExecuteField(fields, 'url')) {
-        let url = await ai.generateURL(service)
+        let url = await openai.generateURL(service)
         if (url) {
             data.url = utils.enforceHttps(url)
         }
@@ -76,38 +76,23 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
     }
 
     if (shouldExecuteField(fields, 'description')) {
-        let description = await ai.generateDescription(service)
-        if (description) {
-            data.description = description
-        }
+        data.description = await openai.generateDescription(service)    
     }
 
     if (shouldExecuteField(fields, 'abstract')) {
-        let abstract = await ai.generateAbstract(service)
-        if (abstract) {
-            data.abstract = abstract
-        }
+        data.abstract = await openai.generateAbstract(service)       
     }
 
     if (shouldExecuteField(fields, 'functionality')) {
-        let functionality = await ai.generateFunctionality(service)
-        if (functionality) {
-            data.functionality = functionality
-        }
+        data.functionality = await openai.generateFunctionality(service)
     }
 
     if (shouldExecuteField(fields, 'shortfacts')) {
-        let shortfacts = await ai.generateShortfacts(service)
-        if (shortfacts) {
-            data.shortfacts = shortfacts
-        }
+        data.shortfacts = await openai.generateShortfacts(service)
     }
 
     if (shouldExecuteField(fields, 'pricing')) {
-        let pricing = await ai.generatePricing(service)
-        if (pricing) {
-            data.pricing = pricing
-        }
+        data.pricing = await ai.generatePricing(service)
     }
 
     if (shouldExecuteField(fields, 'tags')) {

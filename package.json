@@ -31,6 +31,7 @@
     
     "test:workflow:service": "tsx src/test/test-service-workflow.ts",
     "test:workflow:translation": "tsx src/test/test-translation-workflow.ts",
+    "test:workflow:scheduler": "tsx src/test/test-scheduler-workflow.ts",
     
     "lint": "echo 'No linting configured'",
     "test": "echo 'No tests configured'",

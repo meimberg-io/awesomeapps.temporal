@@ -7,7 +7,7 @@ const OPENAI_API_KEY = config.ai.openaiApiKey
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
 
-async function generateWithOpenAI(serviceName: string, prompt: string, modelName: string = 'gpt-4o', temperature: number = 0.7): Promise<string> {
+async function generateWithOpenAI(serviceName: string, prompt: string, modelName: string = 'gpt-5', temperature: number = 1): Promise<string> {
   console.log(`Generating content with OpenAI - service: ${serviceName}, model: ${modelName}`)
   
   const completion = await openai.chat.completions.create({
