@@ -71,11 +71,6 @@ export interface YouTubeVideo {
   }
 }
 
-export interface BrandfetchLogo {
-  logo_png?: string
-  id?: string
-}
-
 export interface UploadLogoResponse {
   id: string
 }

@@ -1,0 +1,165 @@
+name: Build and Push Temporal Worker
+
+on:
+  push:
+    branches: [ main, master ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=semver,pattern={{version}}
+          type=raw,value=latest
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    env:
+      PROJECT_NAME: awesomeapps-temporal
+      APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
+      
+      # Temporal Configuration
+      TEMPORAL_ADDRESS: ${{ vars.TEMPORAL_ADDRESS }}
+      TEMPORAL_NAMESPACE: ${{ vars.TEMPORAL_NAMESPACE }}
+      TEMPORAL_TASK_QUEUE: ${{ vars.TEMPORAL_TASK_QUEUE }}
+      WORKER_CONCURRENCY: ${{ vars.WORKER_CONCURRENCY }}
+      MAX_CONCURRENT_ACTIVITIES: ${{ vars.MAX_CONCURRENT_ACTIVITIES }}
+      
+      # API Configuration
+      STRAPI_API_URL: ${{ vars.STRAPI_API_URL }}
+      STRAPI_GRAPHQL_URL: ${{ vars.STRAPI_GRAPHQL_URL }}
+      TRANSLATION_WORKFLOW_ID: ${{ vars.TRANSLATION_WORKFLOW_ID }}
+      
+      # Secrets
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      STRAPI_API_TOKEN: ${{ secrets.STRAPI_API_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GOOGLE_GEMINI_API_KEY: ${{ secrets.GOOGLE_GEMINI_API_KEY }}
+      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Copy docker-compose template to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ vars.SERVER_HOST }}
+        username: ${{ vars.SERVER_USER || 'deploy' }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "docker-compose.prod.yml"
+        target: "/srv/projects/${{ env.PROJECT_NAME }}/"
+    
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ vars.SERVER_HOST }}
+        username: ${{ vars.SERVER_USER || 'deploy' }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        envs: PROJECT_NAME,GITHUB_TOKEN,DOCKER_IMAGE,APP_DOMAIN,TEMPORAL_ADDRESS,TEMPORAL_NAMESPACE,TEMPORAL_TASK_QUEUE,WORKER_CONCURRENCY,MAX_CONCURRENT_ACTIVITIES,STRAPI_API_URL,STRAPI_GRAPHQL_URL,STRAPI_API_TOKEN,OPENAI_API_KEY,GOOGLE_GEMINI_API_KEY,YOUTUBE_API_KEY,TRANSLATION_WORKFLOW_ID
+        script: |
+          set -e
+          
+          # Login to GitHub Container Registry
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          # Create project directory
+          mkdir -p /srv/projects/${PROJECT_NAME}
+          cd /srv/projects/${PROJECT_NAME}
+          
+          # Create .env file with secrets
+          cat > .env << EOF
+          NODE_ENV=production
+          PORT=8080
+          
+          # Temporal Server Connection
+          TEMPORAL_ADDRESS=${TEMPORAL_ADDRESS}
+          TEMPORAL_NAMESPACE=${TEMPORAL_NAMESPACE}
+          TEMPORAL_TASK_QUEUE=${TEMPORAL_TASK_QUEUE}
+          
+          # Worker Configuration
+          WORKER_CONCURRENCY=${WORKER_CONCURRENCY}
+          MAX_CONCURRENT_ACTIVITIES=${MAX_CONCURRENT_ACTIVITIES}
+          
+          # Strapi API
+          STRAPI_API_URL=${STRAPI_API_URL}
+          STRAPI_GRAPHQL_URL=${STRAPI_GRAPHQL_URL}
+          STRAPI_API_TOKEN=${STRAPI_API_TOKEN}
+          
+          # OpenAI API
+          OPENAI_API_KEY=${OPENAI_API_KEY}
+          
+          # Google Gemini API
+          GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
+          
+          # YouTube API
+          YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+          
+          # Translation Workflow
+          TRANSLATION_WORKFLOW_ID=${TRANSLATION_WORKFLOW_ID}
+          EOF
+          
+          # Substitute variables in docker-compose template
+          export PROJECT_NAME="${PROJECT_NAME}"
+          export DOCKER_IMAGE="${DOCKER_IMAGE}"
+          export APP_DOMAIN="${APP_DOMAIN}"
+          
+          envsubst < docker-compose.prod.yml > docker-compose.yml
+          
+          echo "Generated docker-compose.yml:"
+          cat docker-compose.yml
+          
+          # Pull latest image and deploy
+          docker compose pull
+          docker compose up -d
+          
+          # Wait for container to be ready
+          sleep 5
+          
+          # Verify deployment
+          if docker ps | grep -q ${PROJECT_NAME}; then
+            echo "✅ ${PROJECT_NAME} deployed successfully!"
+            echo "🌐 Accessible at: https://${{ env.APP_DOMAIN }}"
+          else
+            echo "❌ Deployment failed - container not running"
+            docker logs ${PROJECT_NAME}
+            exit 1
+          fi
+

@@ -140,6 +140,28 @@ docker compose --profile prod up
 npm run build
 ```
 
+## 🚀 Deployment
+
+Push to `main` triggers automatic deployment:
+
+```bash
+git push origin main
+```
+
+See [doc/DEPLOYMENT.md](doc/DEPLOYMENT.md) for details.
+
+### Documentation
+
+- **[Deployment](doc/DEPLOYMENT.md)** - Deploy to production
+- **[GitHub Setup](doc/GITHUB-SETUP.md)** - Initial configuration
+- **[Operations](docs/operations.md)** - Temporal operations
+
+## Production
+
+**URL:** https://awesomeapps-temporal.meimberg.io
+**Server:** hc-02.meimberg.io
+**SSH:** `ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io`
+
 ## 🔄 Migration from n8n
 
 This project is set up to migrate complex n8n workflows to Temporal. Key differences:

@@ -182,7 +182,6 @@ export async function uploadLogo(file: Buffer, filename: string): Promise<Upload
   } as UploadLogoResponse
 }
 
-// TODO: Implement fetchBrandLogo in youtube.ts or separate brandfetch activity
 export async function fetchAndUploadLogo(domain: string): Promise<UploadLogoResponse | null> {
   log.info('Fetching and uploading logo - NOT IMPLEMENTED', { domain })
   log.warn('fetchBrandLogo not implemented yet')
