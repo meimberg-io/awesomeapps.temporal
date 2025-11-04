@@ -45,10 +45,9 @@ export async function testActivityWithTwoParams(
 }
 
 export async function testYouTubeVideoActivity(
-  activityFunction: (serviceName: string, videos: YouTubeVideo[]) => Promise<YouTubeVideo>,
+  activityFunction: (serviceName: string) => Promise<YouTubeVideo | null>,
   activityType: string,
-  serviceName: string,
-  videos: YouTubeVideo[]
+  serviceName: string
 ): Promise<void> {
   const env = new MockActivityEnvironment({
     attempt: 1,
@@ -56,7 +55,7 @@ export async function testYouTubeVideoActivity(
     scheduledTimestampMs: Date.now()
   })
 
-  const result = await env.run(activityFunction, serviceName, videos) as YouTubeVideo
+  const result = await env.run(activityFunction, serviceName)
 
   if (result && result.id && result.id.videoId && result.snippet && result.snippet.title) {
     console.log(`✅ ${activityType}`)

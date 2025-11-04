@@ -2,13 +2,13 @@ import { NativeConnection, Worker } from '@temporalio/worker'
 import * as strapiActivities from './activities/strapi'
 import * as geminiActivities from './activities/gemini'
 import * as openaiActivities from './activities/openai'
-import * as externalActivities from './activities/external'
+import * as youtubeActivities from './activities/youtube'
 
 const activities = {
   ...strapiActivities,
   ...geminiActivities,
   ...openaiActivities,
-  ...externalActivities
+  ...youtubeActivities
 }
 
 async function run() {

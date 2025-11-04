@@ -1,5 +1,5 @@
 import { log } from '@temporalio/activity'
-import { fetchBrandLogo } from './external'
+import { fetchBrandLogo } from './youtube'
 import type {
   ServiceData,
   StrapiServiceResponse,

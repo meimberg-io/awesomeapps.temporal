@@ -1,4 +1,4 @@
-import { log, Context } from '@temporalio/activity'
+import { log } from '@temporalio/activity'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import OpenAI from 'openai'
 import type { YouTubeVideo } from '../types/service'
@@ -165,8 +165,7 @@ Only return the video. Return the complete JSON for the video. Make sure to retu
     .trim()
 
   try {
-    const parsed = JSON.parse(cleaned)
-    return parsed
+    return JSON.parse(cleaned)
   } catch (error) {
     log.error('Failed to parse YouTube video selection', { error, responseText })
     throw new Error(`Failed to parse YouTube video selection: ${error}`)
