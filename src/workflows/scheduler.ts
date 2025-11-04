@@ -1,4 +1,4 @@
-import {proxyActivities, sleep, executeChild, ApplicationFailure} from '@temporalio/workflow'
+import {proxyActivities, sleep, executeChild} from '@temporalio/workflow'
 import type * as strapiActivities from '../activities/strapi'
 import {serviceWorkflow} from './service'
 import type {ServiceWorkflowInput} from '../types/service'
