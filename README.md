@@ -148,12 +148,12 @@ Push to `main` triggers automatic deployment:
 git push origin main
 ```
 
-See [doc/DEPLOYMENT.md](doc/DEPLOYMENT.md) for details.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for details.
 
 ### Documentation
 
-- **[Deployment](doc/DEPLOYMENT.md)** - Deploy to production
-- **[GitHub Setup](doc/GITHUB-SETUP.md)** - Initial configuration
+- **[Deployment](docs/DEPLOYMENT.md)** - Deploy to production
+- **[GitHub Setup](docs/GITHUB-SETUP.md)** - Initial configuration
 - **[Operations](docs/operations.md)** - Temporal operations
 
 ## Production

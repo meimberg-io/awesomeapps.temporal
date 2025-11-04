@@ -123,7 +123,7 @@ This requires a separate `docker-compose.yml` with:
 - Temporal server
 - Temporal UI (optional)
 
-See [operations.md](../docs/operations.md) for Temporal infrastructure details.
+See [operations.md](operations.md) for Temporal infrastructure details.
 
 
 
@@ -220,8 +220,8 @@ No code changes needed!
 ## Related Documentation
 
 - [DEPLOYMENT.md](DEPLOYMENT.md) - Deployment operations
-- [operations.md](../docs/operations.md) - Temporal operations
-- [../io.meimberg.ansible/README.md](../../io.meimberg.ansible/README.md) - Ansible overview
-- [../io.meimberg.ansible/docs/SETUP.md](../../io.meimberg.ansible/docs/SETUP.md) - Server setup
-- [../io.meimberg.ansible/docs/SSH-KEYS.md](../../io.meimberg.ansible/docs/SSH-KEYS.md) - SSH key configuration
+- [operations.md](operations.md) - Temporal operations
+- [../../io.meimberg.ansible/README.md](../../io.meimberg.ansible/README.md) - Ansible overview
+- [../../io.meimberg.ansible/docs/SETUP.md](../../io.meimberg.ansible/docs/SETUP.md) - Server setup
+- [../../io.meimberg.ansible/docs/SSH-KEYS.md](../../io.meimberg.ansible/docs/SSH-KEYS.md) - SSH key configuration
 
