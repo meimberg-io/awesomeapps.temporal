@@ -14,7 +14,7 @@ const STRAPI_GRAPHQL_URL = process.env.STRAPI_GRAPHQL_URL || 'https://awesomeapp
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN || ''
 
 if (!STRAPI_API_TOKEN) {
-  log.warn('STRAPI_API_TOKEN not set')
+  console.warn('STRAPI_API_TOKEN not set')
 }
 
 async function strapiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {

@@ -7,11 +7,11 @@ const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || ''
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 
 if (!YOUTUBE_API_KEY) {
-    log.warn('YOUTUBE_API_KEY not set')
+    console.warn('YOUTUBE_API_KEY not set')
 }
 
 if (!OPENAI_API_KEY) {
-    log.warn('OPENAI_API_KEY not set')
+    console.warn('OPENAI_API_KEY not set')
 }
 
 const openai = new OpenAI({

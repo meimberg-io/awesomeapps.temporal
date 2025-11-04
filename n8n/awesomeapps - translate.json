@@ -1,0 +1,489 @@
+{
+  "name": "awesomeapps - translate",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://awesomeapps-strapi.meimberg.io/api/services/{{ $('Service').first().json.data.services[0].documentId }}?locale=de",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {{  $('Data Array').first().json.toJsonString() }}\n}\n\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -128,
+        -1888
+      ],
+      "id": "9ece13a2-b705-47f3-a47f-aadc66702d10",
+      "name": "Update Strapi",
+      "alwaysOutputData": false,
+      "executeOnce": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CeUvr1IO6LHNS80v",
+          "name": "Strapi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "service"
+            },
+            {
+              "name": "fields",
+              "type": "array"
+            },
+            {
+              "name": "newtags",
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3072,
+        -2112
+      ],
+      "id": "cef464bb-2ce5-43c8-9440-f8c22fb28aa7",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "jsCode": "function slugify(name) {\n  return name\n    .toLowerCase()\n    .trim()\n    .replace(/[^a-z0-9]+/g, '-')\n    .replace(/^-+|-+$/g, '');\n}\n\nreturn [{ \n  json: { \n    name: $input.first().json.service,\n    slug: slugify($input.first().json.service),\n    fields: $input.first().json.fields,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2720,
+        -1888
+      ],
+      "id": "a2a2c23d-a3c3-4c8f-aebd-965a4b57784d",
+      "name": "Input"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nfunction getSafeJsonXXX(nodeName, path) {\n  try {\n    const nodeData = $(nodeName).first().json;\n    if (!nodeData) return undefined;\n\n    return path.split('.').reduce((obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined), nodeData);\n  } catch (error) {\n    return undefined; // Falls der Node nicht existiert oder nicht ausgeführt wurde\n  }\n}\n\n\nfunction tokenizePath(path) {\n  if (!path || typeof path !== 'string') return [];\n  // first() -> [0]\n  const normalized = path.replace(/\\.first\\(\\)/g, '[0]');\n  const tokens = [];\n  const re = /[^.[\\]]+|\\[(\\d+)\\]/g;\n  let m;\n  while ((m = re.exec(normalized)) !== null) {\n    tokens.push(m[1] !== undefined ? Number(m[1]) : m[0]);\n  }\n  return tokens;\n}\n\nfunction getSafeJson(nodeName, path) {\n  try {\n    const nodeData = $(nodeName).first().json;\n    if (!nodeData) return undefined;\n    if (!path) return nodeData;\n\n    const tokens = tokenizePath(path);\n    return tokens.reduce((obj, key) => {\n      if (obj == null) return undefined;\n      return obj[key];\n    }, nodeData);\n  } catch (error) {\n    return undefined; // Node existiert nicht oder wurde nicht ausgeführt\n  }\n}\n\nlet payload = $('ServiceData').first().json.service\nif (payload && Object.hasOwn(payload, 'documentId')) {\n  Reflect.deleteProperty(payload, 'documentId');\n}\nconst fields = {\n  locale: \"de\",\n  abstract: getSafeJson('Abstract', 'output'),\n  description: getSafeJson('Description', 'output'),\n  shortfacts: getSafeJson('Shortfacts', 'output'),\n  functionality: getSafeJson('Functionality', 'output'),  \n};\n\n// Füge nur Felder hinzu, die nicht `undefined`, `null` oder leer sind\nObject.entries(fields).forEach(([key, value]) => {\n  if (Array.isArray(value) ? value.length > 0 : value) {\n    payload[key] = value;\n  }\n});\n\n\n\nreturn payload;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        -1888
+      ],
+      "id": "e7e9770d-c7c1-43ab-9502-19176a728e35",
+      "name": "Data Array"
+    },
+    {
+      "parameters": {
+        "content": "[\n  {\n    \"service\": \"Cursor\",\n    \"fields\": [\n      \"url\",\n      \"description\",\n      \"functionality\",\n      \"abstract\",\n      \"pricing\",\n      \"tags\",\n      \"video\",\n      \"shortfacts\"\n    ],\n    \"newtags\": false\n  }\n]",
+        "height": 340,
+        "width": 380,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2912,
+        -880
+      ],
+      "id": "832d5be3-fa2e-4977-a4c8-f4c46aaed622",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "formTitle": "Update or create Service",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "service"
+            },
+            {
+              "fieldLabel": "fields",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "url"
+                  },
+                  {
+                    "option": "description"
+                  },
+                  {
+                    "option": "pricing"
+                  },
+                  {
+                    "option": "shortfacts"
+                  },
+                  {
+                    "option": "abstract"
+                  },
+                  {
+                    "option": "functionality"
+                  },
+                  {
+                    "option": "logo"
+                  },
+                  {
+                    "option": "tags"
+                  },
+                  {
+                    "option": "video"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "newtags"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -3072,
+        -1904
+      ],
+      "id": "113ebc74-f0df-4235-a14e-7eb0ab19c094",
+      "name": "On form submission",
+      "webhookId": "8be98783-6ae1-4cde-a2ef-947273668cc9"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -704,
+        -1264
+      ],
+      "id": "7a4d9e57-b7da-4956-b5d7-52d417ea7dd0",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "TF3A7uIjRhSMP2dC",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate the following Text to German: {{ $json.service.abstract }}",
+        "options": {
+          "systemMessage": "Return only the translated text. No comments."
+        }
+      },
+      "id": "1cc55956-10cf-471a-965c-3402b01637b1",
+      "name": "Abstract",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1968,
+        -1888
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "requestMethod": "GET",
+        "endpoint": "https://awesomeapps-strapi.meimberg.io/graphql",
+        "query": "=query GetServiceDetailBySlug {\n  services(filters: { slug: { eq: \"{{ $('Input').item.json.slug }}\"} }) {\n            documentId\n            name\n            slug\n            url\n            abstract\n            description\n            pricing\n            functionality\n            shortfacts\nslug\nname\nurl\ntop\npublishdate\ntags {\ndocumentId\n}\nreviewCount\naverageRating\n        }\n    }\n\n"
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1.1,
+      "position": [
+        -2480,
+        -1888
+      ],
+      "id": "41655190-d82b-419b-8e99-f19fcd18f0bd",
+      "name": "Service"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate the following Text to German: {{ $('ServiceData').item.json.service.description }}",
+        "options": {
+          "systemMessage": "Return only the translated text. No comments. The Text is in markdown. the markdown formatting must be preserved."
+        }
+      },
+      "id": "781cd067-fe8e-47b9-a194-8a87038778f2",
+      "name": "Description",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1664,
+        -1888
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate the following Text to German: {{ $('ServiceData').item.json.service.pricing }}",
+        "options": {
+          "systemMessage": "Return only the translated text. No comments. The Text is in markdown. The markdown formatting must be preserved."
+        }
+      },
+      "id": "af800caf-27f0-446c-9b4a-5725ed530271",
+      "name": "Pricing",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -2576,
+        -1568
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate the following Text to German: {{ $('ServiceData').item.json.service.functionality }}",
+        "options": {
+          "systemMessage": "Return only the translated text. No comments. The Text is in markdown. the markdown formatting must be preserved."
+        }
+      },
+      "id": "7ff41fb1-e9b2-4e42-9726-033fb707f74b",
+      "name": "Functionality",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1024,
+        -1888
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate the following Text to German : {{ $('ServiceData').item.json.service.shortfacts }}",
+        "options": {
+          "systemMessage": "Return only the translated text. No comments."
+        }
+      },
+      "id": "7dc29c80-021b-4ff3-ba69-c3fb696d5460",
+      "name": "Shortfacts",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -688,
+        -1888
+      ],
+      "typeVersion": 1.6,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json.data.services[0];\ns.tags = s.tags.map(tag => tag.documentId);\n\n\n\nreturn {\n  json: {\n    service: $input.first().json.data.services[0]\n  }\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2192,
+        -1888
+      ],
+      "id": "eeca6c33-6c15-41e0-aec3-298a4e23932d",
+      "name": "ServiceData"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "service": "Airtable",
+          "fields": [
+            "url",
+            "tags"
+          ],
+          "newtags": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Service",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Array": {
+      "main": [
+        [
+          {
+            "node": "Update Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Abstract",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Description",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Functionality",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Shortfacts",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abstract": {
+      "main": [
+        [
+          {
+            "node": "Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Service": {
+      "main": [
+        [
+          {
+            "node": "ServiceData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Description": {
+      "main": [
+        [
+          {
+            "node": "Functionality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pricing": {
+      "main": [
+        []
+      ]
+    },
+    "Functionality": {
+      "main": [
+        [
+          {
+            "node": "Shortfacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shortfacts": {
+      "main": [
+        [
+          {
+            "node": "Data Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ServiceData": {
+      "main": [
+        [
+          {
+            "node": "Abstract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "002bbd15-bc0c-4d78-ace9-36159727f2a1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "614f4ac1770d547a84f14994b79bd2091454195ebec18a9773bbbdc2834c261d"
+  },
+  "id": "UxndSFHh7ve4DPto",
+  "tags": [
+    {
+      "createdAt": "2025-03-27T20:32:44.481Z",
+      "updatedAt": "2025-03-27T20:32:44.481Z",
+      "id": "U53kS7HuiBaY3SiC",
+      "name": "serviceatls"
+    }
+  ]
+}

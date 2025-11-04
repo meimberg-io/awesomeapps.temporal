@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { NativeConnection, Worker } from '@temporalio/worker'
 import * as strapiActivities from './activities/strapi'
 import * as geminiActivities from './activities/gemini'
