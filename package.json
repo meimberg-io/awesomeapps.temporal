@@ -44,13 +44,13 @@
     "@temporalio/testing": "^1.13.1",
     "@temporalio/worker": "^1.11.1",
     "@temporalio/workflow": "^1.11.1",
+    "dotenv": "^16.6.1",
     "form-data": "^4.0.0",
     "openai": "^4.28.0"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@temporalio/testing": "^1.11.1",
-    "dotenv": "^16.6.1",
     "tsx": "^4.7.0",
     "typescript": "^5.7.3"
   },
