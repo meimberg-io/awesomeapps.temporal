@@ -18,6 +18,9 @@ Initial configuration required for automatic deployment.
 | `STRAPI_API_URL` | `https://awesomeapps-strapi.meimberg.io/api` | Strapi API URL |
 | `STRAPI_GRAPHQL_URL` | `https://awesomeapps-strapi.meimberg.io/graphql` | Strapi GraphQL URL |
 | `TRANSLATION_WORKFLOW_ID` | `UxndSFHh7ve4DPto` | Translation workflow ID |
+| `AZURE_CLIENT_ID` | `<azure client id>` | Azure AD App (Application) ID |
+| `AZURE_TENANT_ID` | `<tenant id>` | Azure AD Tenant (Directory) ID |
+| `MICROSOFT_TODO_LIST_ID` | `<list id>` | Default Microsoft To Do list ID |
 
 ## GitHub Secrets
 
@@ -30,6 +33,9 @@ Initial configuration required for automatic deployment.
 | `OPENAI_API_KEY` | `<openai key>` | OpenAI API key |
 | `GOOGLE_GEMINI_API_KEY` | `<gemini key>` | Google Gemini API key |
 | `YOUTUBE_API_KEY` | `<youtube key>` | YouTube Data API key |
+| `AZURE_CLIENT_SECRET` | `<azure client secret>` | Azure AD Client Secret |
+| `MICROSOFT_TODO_REFRESH_TOKEN` | `<refresh token>` | Microsoft Graph refresh token (Tasks scope) |
+| `MICROSOFT_TODO_ACCESS_TOKEN` | `<access token>` | Optional bootstrap access token (short‑lived) |
 
 **Get SSH private key:**
 ```bash
@@ -53,6 +59,22 @@ Copy entire output including `-----BEGIN` and `-----END` lines.
 - **OpenAI:** https://platform.openai.com/api-keys
 - **Google Gemini:** https://aistudio.google.com/app/apikey
 - **YouTube:** https://console.cloud.google.com/apis/credentials
+
+**Microsoft To Do / Azure (summary):**
+1. Azure Portal → App registrations → your app
+2. API permissions (Delegated): `Tasks.ReadWrite`, `User.Read`, `offline_access` → Grant admin consent
+3. Authentication: Add redirect URI `http://localhost:3000/callback` (Web). Enable public client flows if using device code.
+4. Certificates & secrets: Create client secret (store VALUE)
+5. Obtain tokens:
+   - Use the helper scripts in `scripts/`:
+     - `node scripts/get-ms-refresh-token-confidential.js` (client secret + browser)
+     - or `node scripts/get-ms-refresh-token-raw.js`
+   - If refresh token is `<none>`, redo consent ensuring “Zugriff im Namen Ihrer Organisation” is unchecked
+6. Copy values to GitHub Variables/Secrets as listed above
+7. Find your default To Do list ID and set `MICROSOFT_TODO_LIST_ID`
+   ```bash
+   curl -s -H "Authorization: Bearer <ACCESS_TOKEN>" https://graph.microsoft.com/v1.0/me/todo/lists | jq -r '.value[] | {displayName,id}'
+   ```
 
 
 

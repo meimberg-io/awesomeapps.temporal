@@ -8,7 +8,6 @@
     "dev": "tsc --watch",
     "start": "node dist/src/worker.js",
     "start:dev": "tsx watch src/worker.ts",
-    
     "test:abstract:openai": "tsx src/test/test-abstract-openai.ts",
     "test:url:openai": "tsx src/test/test-url-openai.ts",
     "test:description:openai": "tsx src/test/test-description-openai.ts",
@@ -17,7 +16,6 @@
     "test:pricing:openai": "tsx src/test/test-pricing-openai.ts",
     "test:tags:openai": "tsx src/test/test-tags-openai.ts",
     "test:all:openai": "tsx src/test/test-all-openai.ts",
-    
     "test:abstract:gemini": "tsx src/test/test-abstract-gemini.ts",
     "test:url:gemini": "tsx src/test/test-url-gemini.ts",
     "test:description:gemini": "tsx src/test/test-description-gemini.ts",
@@ -26,18 +24,16 @@
     "test:pricing:gemini": "tsx src/test/test-pricing-gemini.ts",
     "test:tags:gemini": "tsx src/test/test-tags-gemini.ts",
     "test:all:gemini": "tsx src/test/test-all-gemini.ts",
-    
     "test:video": "tsx src/test/test-video.ts",
-    
     "test:workflow:service": "tsx src/test/test-service-workflow.ts",
     "test:workflow:translation": "tsx src/test/test-translation-workflow.ts",
     "test:workflow:scheduler": "tsx src/test/test-scheduler-workflow.ts",
-    
     "lint": "echo 'No linting configured'",
     "test": "echo 'No tests configured'",
     "test:ci": "echo 'No tests configured'"
   },
   "dependencies": {
+    "@azure/msal-node": "^3.8.1",
     "@google/generative-ai": "^0.21.0",
     "@temporalio/activity": "^1.11.1",
     "@temporalio/client": "^1.11.1",
@@ -49,8 +45,8 @@
     "openai": "^4.28.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
     "@temporalio/testing": "^1.11.1",
+    "@types/node": "^20",
     "tsx": "^4.7.0",
     "typescript": "^5.7.3"
   },

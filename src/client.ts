@@ -3,6 +3,7 @@ import { config } from './config/env'
 import { serviceWorkflow } from './workflows/service'
 import { translationWorkflow } from './workflows/translation'
 import { schedulerWorkflow } from './workflows/scheduler'
+import { microsoftTodoWorkflow } from './workflows/microsoft-todo'
 import type { ServiceWorkflowInput, TranslationWorkflowInput } from './types/service'
 
 export async function createClient() {
@@ -75,6 +76,35 @@ export async function startSchedulerWorkflow() {
   console.log('Scheduler workflow started', {
     workflowId: handle.workflowId,
     runId: handle.firstExecutionRunId
+  })
+
+  const result = await handle.result()
+
+  await connection.close()
+
+  return result
+}
+
+export async function startMicrosoftTodoWorkflow(taskListId?: string, limit?: number) {
+  const { client, connection } = await createClient()
+
+  const resolvedListId = taskListId || config.microsoftTodo.credentials.defaultListId
+  if (!resolvedListId) {
+    await connection.close()
+    throw new Error('MICROSOFT_TODO_LIST_ID is not set and no taskListId was provided')
+  }
+
+  const handle = await client.workflow.start(microsoftTodoWorkflow, {
+    args: [{ taskListId: resolvedListId, limit }],
+    taskQueue: config.temporal.taskQueue,
+    workflowId: `microsoft-todo-${Date.now()}`
+  })
+
+  console.log('Microsoft To Do workflow started', {
+    workflowId: handle.workflowId,
+    runId: handle.firstExecutionRunId,
+    taskListId: resolvedListId,
+    limit
   })
 
   const result = await handle.result()

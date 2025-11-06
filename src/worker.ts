@@ -5,13 +5,15 @@ import * as geminiActivities from './activities/gemini'
 import * as openaiActivities from './activities/openai'
 import * as youtubeActivities from './activities/youtube'
 import * as translationActivities from './activities/translation'
+import * as microsoftTodoActivities from './activities/microsoft-todo'
 
 const activities = {
   ...strapiActivities,
   ...geminiActivities,
   ...openaiActivities,
   ...youtubeActivities,
-  ...translationActivities
+  ...translationActivities,
+  ...microsoftTodoActivities
 }
 
 async function run() {

@@ -1,5 +1,14 @@
 import 'dotenv/config'
 
+interface MicrosoftTodoConfig {
+  clientId: string
+  clientSecret: string
+  tenantId: string
+  refreshToken: string
+  initialAccessToken?: string
+  defaultListId?: string
+}
+
 interface Config {
   temporal: {
     address: string
@@ -19,6 +28,9 @@ interface Config {
   youtube: {
     apiKey: string
   }
+  microsoftTodo: {
+    credentials: MicrosoftTodoConfig
+  }
 }
 
 function getRequired(key: string): string {
@@ -27,6 +39,10 @@ function getRequired(key: string): string {
     throw new Error(`Missing required environment variable: ${key}`)
   }
   return value
+}
+
+function getOptional(key: string): string | undefined {
+  return process.env[key] || undefined
 }
 
 export const config: Config = {
@@ -50,6 +66,16 @@ export const config: Config = {
   },
   youtube: {
     apiKey: getRequired('YOUTUBE_API_KEY')
+  },
+  microsoftTodo: {
+    credentials: {
+      clientId: getRequired('AZURE_CLIENT_ID'),
+      clientSecret: getRequired('AZURE_CLIENT_SECRET'),
+      tenantId: getRequired('AZURE_TENANT_ID'),
+      refreshToken: getRequired('MICROSOFT_TODO_REFRESH_TOKEN'),
+      initialAccessToken: getOptional('MICROSOFT_TODO_ACCESS_TOKEN'),
+      defaultListId: getOptional('MICROSOFT_TODO_LIST_ID')
+    }
   }
 }
 

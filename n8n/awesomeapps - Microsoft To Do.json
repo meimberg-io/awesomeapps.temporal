@@ -1,0 +1,146 @@
+{
+  "name": "awesomeapps - Microsoft To Do",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f50ed997-351b-454b-9dff-83eeb89ae6e1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "taskListId": "AAMkAGFiMjc3MDE0LTcxZjctNDlhYy05Mjc0LTdhYTA3OTY0ODUwYwAuAAAAAAC9f-8GSdoAT6lNfTj-NMYpAQBcirQJoB9nS5Azec74Fo-5AAHmRKtCAAA=",
+        "limit": 10
+      },
+      "type": "n8n-nodes-base.microsoftToDo",
+      "typeVersion": 1,
+      "position": [
+        272,
+        0
+      ],
+      "id": "e3699ca9-3d5a-4917-b77a-6bc085ebbd35",
+      "name": "Get Tasks",
+      "credentials": {
+        "microsoftToDoOAuth2Api": {
+          "id": "qwvSTynaLwRfL9Ct",
+          "name": "Microsoft To Do account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "taskListId": "AAMkAGFiMjc3MDE0LTcxZjctNDlhYy05Mjc0LTdhYTA3OTY0ODUwYwAuAAAAAAC9f-8GSdoAT6lNfTj-NMYpAQBcirQJoB9nS5Azec74Fo-5AAHmRKtCAAA=",
+        "taskId": "={{ $('Get Tasks').item.json.id }}"
+      },
+      "type": "n8n-nodes-base.microsoftToDo",
+      "typeVersion": 1,
+      "position": [
+        864,
+        0
+      ],
+      "id": "7b01b910-eb19-4713-b546-cbf01f614e2b",
+      "name": "Delete Task",
+      "credentials": {
+        "microsoftToDoOAuth2Api": {
+          "id": "qwvSTynaLwRfL9Ct",
+          "name": "Microsoft To Do account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://awesomeapps-strapi.meimberg.io/api/new-services",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\" : {\n    \"slug\" : \"{{ $json.title }}\",\n    \"n8nstatus\": \"new\"\n  }\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        544,
+        0
+      ],
+      "id": "247d4aa2-c616-4a3a-baf5-0123ab3f2b0f",
+      "name": "Create Item in Strapi",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CeUvr1IO6LHNS80v",
+          "name": "Strapi Account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Tasks": {
+      "main": [
+        [
+          {
+            "node": "Create Item in Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Item in Strapi": {
+      "main": [
+        [
+          {
+            "node": "Delete Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "96bb584b-2057-41e6-929c-fbd3dab21d5b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "614f4ac1770d547a84f14994b79bd2091454195ebec18a9773bbbdc2834c261d"
+  },
+  "id": "wBWfsSVVZkxAq3xc",
+  "tags": [
+    {
+      "createdAt": "2025-03-27T20:32:44.481Z",
+      "updatedAt": "2025-03-27T20:32:44.481Z",
+      "id": "U53kS7HuiBaY3SiC",
+      "name": "serviceatls"
+    }
+  ]
+}

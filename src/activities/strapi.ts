@@ -360,3 +360,14 @@ export async function deleteNewService(documentId: string): Promise<void> {
   log.info('New service deleted successfully', { documentId })
 }
 
+export async function createNewService(data: { slug: string; n8nstatus: string }): Promise<void> {
+  log.info('Creating new service', { slug: data.slug, n8nstatus: data.n8nstatus })
+  
+  await strapiRequest('/new-services', {
+    method: 'POST',
+    body: JSON.stringify({ data })
+  })
+
+  log.info('New service created successfully', { slug: data.slug })
+}
+
