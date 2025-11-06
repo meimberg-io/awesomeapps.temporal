@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-interface MicrosoftTodoConfig {
+export interface MicrosoftTodoConfig {
   clientId: string
   clientSecret: string
   tenantId: string

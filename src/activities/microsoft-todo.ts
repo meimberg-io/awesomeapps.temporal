@@ -55,7 +55,7 @@ export async function getTasks(taskListId: string, limit: number = 10): Promise<
   log.info('Fetching tasks from Microsoft To Do', { taskListId, limit })
   
   const tasks: MicrosoftTodoTask[] = []
-  let url = `/me/todo/lists/${taskListId}/tasks?$top=${limit}&$orderby=createdDateTime desc`
+  let url: string | undefined = `/me/todo/lists/${taskListId}/tasks?$top=${limit}&$orderby=createdDateTime desc`
   
   while (url && tasks.length < limit) {
     const response = await microsoftGraphRequest(url) as MicrosoftTodoTasksResponse
