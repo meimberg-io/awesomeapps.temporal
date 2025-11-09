@@ -35,7 +35,7 @@ export async function schedulerWorkflow(): Promise<{ processed: boolean; documen
     await sleep('2 seconds')
 
     // Update status to "pending"
-    await strapi.updateNewServiceStatus(documentId, 'pending')
+    await strapi.updateNewServiceStatus(documentId, 'pending', null)
 
     // Prepare service workflow input
     const serviceInput: ServiceWorkflowInput = {
@@ -63,7 +63,55 @@ export async function schedulerWorkflow(): Promise<{ processed: boolean; documen
   } catch (error) {
     // On error, update status to "error"
     try {
-      await strapi.updateNewServiceStatus(documentId, 'error')
+      const baseMessage = error instanceof Error ? error.message : String(error)
+      const baseStack = error instanceof Error ? error.stack : undefined
+
+      const collectFailureMessages = (failure: any, depth = 0): string[] => {
+        if (!failure || depth > 10) return []
+        const parts: string[] = []
+        if (typeof failure.message === 'string' && failure.message.length > 0) {
+          parts.push(failure.message)
+        }
+        if (failure.stackTrace && Array.isArray(failure.stackTrace)) {
+          const stack = failure.stackTrace
+            .map((frame: any) => {
+              const fn = frame?.functionName ?? frame?.function ?? '<anon>'
+              const file = frame?.fileName ?? frame?.file ?? '<unknown>'
+              const line = frame?.lineNumber ?? '?'
+              return `    at ${fn} (${file}:${line})`
+            })
+            .join('\n')
+          if (stack) {
+            parts.push(stack)
+          }
+        }
+        if (failure.cause) {
+          parts.push(...collectFailureMessages(failure.cause, depth + 1))
+        }
+        return parts
+      }
+
+      const failure =
+        (error as any)?.cause?.failure ??
+        (error as any)?.failure ??
+        (error as any)?.cause
+
+      const failureMessages = collectFailureMessages(failure)
+      const stackMessages = baseStack ? [`Stack:\n${baseStack}`] : []
+
+      const combinedMessage = [
+        baseMessage,
+        ...failureMessages.map((msg, idx) => (idx === 0 ? `Cause:\n${msg}` : msg)),
+        ...stackMessages,
+      ]
+        .filter(Boolean)
+        .join('\n\n')
+
+      await strapi.updateNewServiceStatus(
+        documentId,
+        'error',
+        combinedMessage
+      )
     } catch (updateError) {
       // Log but don't throw if status update fails
     }

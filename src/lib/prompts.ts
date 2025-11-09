@@ -16,11 +16,11 @@ The first heading should be on the second level (##), all others should be on th
 Please only output the Markdown, no additional text around it. Please only output the pure Markdown, do not surround it with \`\`\`markdown and \`\`\``,
 
   abstract: (serviceName: string) =>
-    `Write a short descriptive sentence (60–120 characters) without an article at the beginning of the sentence and without mentioning the name again, referring to the following service: ${serviceName}`,
+    `Write a short descriptive sentence (60-120 characters) without an article at the beginning of the sentence and without mentioning the name again, referring to the following service: ${serviceName}`,
 
   functionality: (serviceName: string) =>
-    `Create a concise list of 3–8 important functions and uses as bullet points for the following internet service/app: ${serviceName}. The list should clearly convey the core characteristics, categories, and top features for users so that they can understand at a glance what the service is suitable for. 
-
+    `Create a concise list of 3-8 important functions and uses as bullet points for the following internet service/app: ${serviceName}. 
+The list should clearly convey the core characteristics, categories, and top features for users so that they can understand at a glance what the service is suitable for. 
 The list should NOT list content offered by the platform, but rather features and uses.
 
 Example for Canva:
@@ -56,7 +56,9 @@ If you don't find a pricing, just state nothing.`,
 
 This is the global tag list: ${availableTags}
 
-Now search this list for suitable tags for the app/service ${serviceName}. If only one really fits, use only that one. If several fit, use several. There should not be more than 6. There can also be fewer. Only tags that describe the core function of the service or app should be used, not any secondary functions.
+Now search this list for suitable tags for the app/service ${serviceName}. If only one really fits, use only that one. If several fit, use several. 
+There should not be more than 6. There can also be fewer. 
+Only tags that describe the core function of the service or app should be used, not any secondary functions.
 
 Output the tags without any additional text, separated by commas!`,
 

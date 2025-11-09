@@ -327,6 +327,7 @@ export async function getNewServices(status: 'new' | 'pending'): Promise<NewServ
         documentId
         slug
         field
+        errorMessage
       }
     }
   `
@@ -340,14 +341,19 @@ export async function getNewServices(status: 'new' | 'pending'): Promise<NewServ
   }
 }
 
-export async function updateNewServiceStatus(documentId: string, status: 'new' | 'pending' | 'error'): Promise<void> {
-  log.info('Updating new service status', { documentId, status })
+export async function updateNewServiceStatus(
+  documentId: string,
+  status: 'new' | 'pending' | 'error',
+  errorMessage?: string | null
+): Promise<void> {
+  log.info('Updating new service status', { documentId, status, errorMessage })
   
   await strapiRequest(`/new-services/${documentId}`, {
     method: 'PUT',
     body: JSON.stringify({
       data: {
-        n8nstatus: status
+        n8nstatus: status,
+        errorMessage: errorMessage ?? null,
       }
     })
   })
@@ -370,7 +376,7 @@ export async function createNewService(data: { slug: string; n8nstatus: string }
   
   await strapiRequest('/new-services', {
     method: 'POST',
-    body: JSON.stringify({ data })
+    body: JSON.stringify({ data: { ...data, errorMessage: null } })
   })
 
   log.info('New service created successfully', { slug: data.slug })

@@ -127,6 +127,7 @@ export interface NewService {
   documentId: string
   slug: string
   field?: string
+  errorMessage?: string | null
 }
 
 export interface NewServicesResponse {

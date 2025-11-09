@@ -41,17 +41,12 @@ export async function generateURL(serviceName: string): Promise<string> {
 
 // Description
 export async function generateDescription(serviceName: string): Promise<string> {
-    return await generateWithOpenAI(
-        serviceName,
-        prompts.description(serviceName),
-        OPENAI_MODELS.gpt5,
-        systemmessages.author
-    )
+    return await generateWithOpenAI(serviceName, prompts.description(serviceName), OPENAI_MODELS.gpt5, systemmessages.author)
 }
 
 // Abstract
 export async function generateAbstract(serviceName: string): Promise<string> {
-    return await generateWithOpenAI(serviceName, prompts.abstract(serviceName), OPENAI_MODELS.gpt5, systemmessages.shorty, 0.5)
+    return await generateWithOpenAI(serviceName, prompts.abstract(serviceName), OPENAI_MODELS.gpt5, systemmessages.shorty)
 }
 
 // Functionality
@@ -61,18 +56,18 @@ export async function generateFunctionality(serviceName: string): Promise<string
 
 // Shortfacts
 export async function generateShortfacts(serviceName: string): Promise<string> {
-    return await generateWithOpenAI(serviceName, prompts.shortfacts(serviceName), OPENAI_MODELS.gpt5, systemmessages.shorty, 0.5)
+    return await generateWithOpenAI(serviceName, prompts.shortfacts(serviceName), OPENAI_MODELS.gpt5, systemmessages.shorty)
 }
 
 // Pricing
 export async function generatePricing(serviceName: string): Promise<string> {
-    const result = await generateWithOpenAI(serviceName, prompts.pricing(serviceName), OPENAI_MODELS.gpt5, systemmessages.none, 0.3)
+    const result = await generateWithOpenAI(serviceName, prompts.pricing(serviceName), OPENAI_MODELS.gpt5, systemmessages.none)
     return result.replace(/```markdown\s*/, '').replace(/```/, '').trim()
 }
 
 // Tags
 export async function chooseTags(serviceName: string, availableTags: string): Promise<string> {
-    return await generateWithOpenAI(serviceName, prompts.tags(serviceName, availableTags), OPENAI_MODELS.gpt5, systemmessages.none, 0.3)
+    return await generateWithOpenAI(serviceName, prompts.tags(serviceName, availableTags), OPENAI_MODELS.gpt5, systemmessages.none)
 }
 
 // YouTube Video
@@ -90,7 +85,7 @@ export async function chooseYouTubeVideo(serviceName: string, videos: YouTubeVid
                 content: prompt
             }
         ],
-        temperature: 0.3
+        temperature: 1
     })
 
     const responseText = completion.choices[0]?.message?.content || ''
