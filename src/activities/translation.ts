@@ -29,7 +29,7 @@ async function translateText(text: string, preserveMarkdown: boolean = false): P
         content: `Translate the following text to German: ${text}`
       }
     ],
-    temperature: 0.3
+    temperature: 1
   })
 
   const translation = completion.choices[0]?.message?.content || ''
