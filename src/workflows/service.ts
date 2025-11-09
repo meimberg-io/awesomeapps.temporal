@@ -50,11 +50,10 @@ function slugify(name: string): string {
 }
 
 export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ success: boolean; documentId?: string }> {
-    const {service, fields = [], newtags = false, aiProvider = 'gemini'} = input
+    const {service, fields = []} = input
     const serviceSlug = slugify(service)
 
     // Choose AI provider based on input
-    const ai = aiProvider === 'openai' ? openai : gemini
 
     const serviceExists = await strapi.checkServiceExists(serviceSlug)
     const existingService = serviceExists.data.services.length > 0 ? serviceExists.data.services[0] : null
@@ -87,33 +86,51 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
         data.functionality = await openai.generateFunctionality(service)
     }
 
-    if (shouldExecuteField(fields, 'shortfacts')) {
+    if (shouldExecuteField(fields, 'shorty')) {
         data.shortfacts = await openai.generateShortfacts(service)
     }
 
     if (shouldExecuteField(fields, 'pricing')) {
-        data.pricing = await ai.generatePricing(service)
+        data.pricing = await gemini.generatePricing(service)
     }
 
     if (shouldExecuteField(fields, 'tags')) {
         const allTagsResponse = await strapi.getAllTags()
-        const allTags = allTagsResponse.data.tags.map(tag => tag.name).join(', ')
+        const allTags = allTagsResponse.data.tags
 
-        const selectedTagsString = await ai.chooseTags(service, allTags)
-        const selectedTagNames = selectedTagsString.split(',').map(t => t.trim()).filter(Boolean)
+        const isTagExcluded = (tag: typeof allTags[number]) => tag?.tagStatus === 'excluded'
+
+        const allowedTags = allTags.filter(tag => {
+            if (tag.tagStatus) {
+                return tag.tagStatus === 'active'
+            }
+            return !tag.excluded
+        })
+
+        const allowedTagNames = allowedTags.map(tag => tag.name).join(', ')
+
+        let selectedTagNames: string[] = []
+
+        if (allowedTagNames.length > 0) {
+            const selectedTagsString = await gemini.chooseTags(service, allowedTagNames)
+            selectedTagNames = selectedTagsString.split(',').map(t => t.trim()).filter(Boolean)
+        }
 
         const existingTagsMap = new Map(
-            allTagsResponse.data.tags.map(tag => [tag.name.toLowerCase(), tag.documentId])
+            allTags.map(tag => [tag.name.toLowerCase(), tag])
         )
 
         const tagDocumentIds: string[] = []
 
         for (const tagName of selectedTagNames) {
-            const existingTagId = existingTagsMap.get(tagName.toLowerCase())
-            if (existingTagId) {
-                tagDocumentIds.push(existingTagId)
-            } else if (newtags) {
-                const newTag = await strapi.createTag(tagName)
+            const existingTag = existingTagsMap.get(tagName.toLowerCase())
+            if (existingTag) {
+                if (isTagExcluded(existingTag)) {
+                    continue
+                }
+                tagDocumentIds.push(existingTag.documentId)
+            } else {
+                const newTag = await strapi.createTag(tagName, 'proposed')
                 tagDocumentIds.push(newTag.data.documentId)
             }
         }
@@ -153,7 +170,7 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
     // Translation workflow call - translate fields that were updated
     try {
         const translationFields = Object.keys(finalData).filter(field => 
-            ['abstract', 'description', 'functionality', 'shortfacts', 'pricing'].includes(field)
+            ['abstract', 'description', 'functionality', 'shorty', 'pricing'].includes(field)
         )
         
         if (translationFields.length > 0) {

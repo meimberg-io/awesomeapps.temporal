@@ -5,7 +5,7 @@ async function testServiceWorkflow() {
   
   const result = await startServiceWorkflow({
     service: 'Discord',
-    fields: ['url', 'abstract', 'description', 'functionality', 'shortfacts', 'pricing', 'tags', 'video'],
+    fields: ['url', 'abstract', 'description', 'functionality', 'shorty', 'pricing', 'tags', 'video'],
     aiProvider: 'openai'
   })
   

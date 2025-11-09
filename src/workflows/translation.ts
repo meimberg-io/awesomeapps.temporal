@@ -67,7 +67,7 @@ export async function translationWorkflow(input: TranslationWorkflowInput): Prom
     translationData.functionality = await translation.translateFunctionality(service.functionality)
   }
 
-  if (service.shortfacts && shouldTranslate('shortfacts')) {
+  if (service.shortfacts && shouldTranslate('shorty')) {
     translationData.shortfacts = await translation.translateShortfacts(service.shortfacts)
   }
 

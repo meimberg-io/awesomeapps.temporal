@@ -1,3 +1,5 @@
+import { iconsPromptText } from './icons'
+
 export const prompts = {
   url: (serviceName: string) =>
     `URL of the platform "${serviceName}". Respond only with the complete URL, e.g., https://agent.ai. No explanations, no warnings. Just the URL.`,
@@ -59,7 +61,7 @@ Now search this list for suitable tags for the app/service ${serviceName}. If on
 Output the tags without any additional text, separated by commas!`,
 
   youtubeVideo: (serviceName: string, videosJson: string) =>
-    `Here is a list of YouTube videos:
+      `Here is a list of YouTube videos:
 
 ${videosJson}
 
@@ -67,5 +69,50 @@ ${videosJson}
 
 Return the video that best suits introducing a user to the app/service "${serviceName}".
 
-Only return the video. Return the complete JSON for the video. Make sure to return the complete JSON. The JSON must be valid! And only return the JSON, no text, no explanation, no punctuation. No Markdown, no embedding in \`\`\``
+Only return the video. Return the complete JSON for the video. Make sure to return the complete JSON. The JSON must be valid! And only return the JSON, no text, no explanation, no punctuation. No Markdown, no embedding in \`\`\``,
+
+    tagicon: (tag: string) =>
+    `We are looking for a suitable icon for a new tag. This is a list of available lucide icons: 
+    
+---
+    
+${iconsPromptText}
+
+---
+
+Select **a suitable icon from this icon list** for the tag "${tag}". **Only use icons from the icon list**. 
+Do not invent new ones! To be on the safe side, check whether the icon is actually in the icon list. 
+If it is not, select one from the list. It is very important that only tags from the icon list are used.
+
+---
+
+Here are a few example assignments:
+
+ai:    sparkles  
+analytics: chart-no-axes-combined  
+animation: clapperboard  
+api: braces  
+art: palette  
+audio: audio-lines  
+automation: bot  
+blogging: clipboard-pen  
+brainstorming: brain  
+branding: frame  
+chatbot: message-circle-code  
+ci: refresh-ccw  
+codehosting: github  
+coding: code  
+collaboration: users  
+collaborative: handshake
+
+---
+
+return only the name of the icon, nothing else. No explanations, no punctuation, no Markdown. 
+`
+
+
+
+
+
+
 }

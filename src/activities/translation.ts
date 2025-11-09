@@ -11,12 +11,14 @@ const openai = new OpenAI({
 async function translateText(text: string, preserveMarkdown: boolean = false): Promise<string> {
   log.info('Translating text to German', {textLength: text.length, preserveMarkdown})
 
+  const briefing = 'Return only the translated text. No comments. Don\'t use formal language.'
+
   const systemMessage = preserveMarkdown
-    ? 'Return only the translated text. No comments. The text is in markdown. The markdown formatting must be preserved.'
-    : 'Return only the translated text. No comments.'
+    ? briefing + ' The text is in markdown. The markdown formatting must be preserved.'
+    : briefing
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5',
     messages: [
       {
         role: 'system',

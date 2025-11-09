@@ -90,6 +90,7 @@ export async function getAllTags(): Promise<StrapiTagResponse> {
       tags(sort: "name:asc") {
         documentId
         name
+        tagStatus
       }
     }
   `
@@ -135,14 +136,18 @@ export async function updateService(documentId: string, data: ServiceData): Prom
   }
 }
 
-export async function createTag(name: string): Promise<StrapiCreateTagResponse> {
+export async function createTag(
+  name: string,
+  tagStatus: 'active' | 'proposed' | 'excluded' = 'proposed'
+): Promise<StrapiCreateTagResponse> {
   log.info('Creating tag', { name })
   
   const response = await strapiRequest('/tags', {
     method: 'POST',
     body: JSON.stringify({
       data: {
-        name
+        name,
+        tagStatus
       }
     })
   })

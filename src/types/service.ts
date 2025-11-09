@@ -36,6 +36,8 @@ export interface StrapiServiceResponse {
 export interface StrapiTag {
   documentId: string
   name: string
+  excluded?: boolean
+  tagStatus?: 'active' | 'proposed' | 'excluded'
 }
 
 export interface StrapiTagResponse {

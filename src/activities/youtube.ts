@@ -1,15 +1,10 @@
 import {log} from '@temporalio/activity'
-import OpenAI from 'openai'
 import {config} from '../config/env'
 import type {YouTubeSearchResult, YouTubeVideo} from '../types/service'
-import {prompts} from '../lib/prompts'
+import {chooseYouTubeVideo} from "./openai";
 
 const YOUTUBE_API_KEY = config.youtube.apiKey
-const OPENAI_API_KEY = config.ai.openaiApiKey
 
-const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY
-})
 
 async function searchYouTube(serviceName: string): Promise<YouTubeSearchResult> {
     log.info('Searching YouTube', {serviceName})
@@ -33,6 +28,7 @@ async function searchYouTube(serviceName: string): Promise<YouTubeSearchResult> 
     return data as YouTubeSearchResult
 }
 
+/*
 async function chooseVideo(serviceName: string, videos: YouTubeVideo[]): Promise<YouTubeVideo> {
     log.info('Choosing YouTube video with OpenAI', {serviceName, videoCount: videos.length})
   
@@ -64,7 +60,7 @@ async function chooseVideo(serviceName: string, videos: YouTubeVideo[]): Promise
         log.error('Failed to parse YouTube video selection', {error, responseText})
         throw new Error(`Failed to parse YouTube video selection: ${error}`)
     }
-}
+}*/
 
 export async function getYouTubeVideo(serviceName: string): Promise<YouTubeVideo | null> {
     const searchResults = await searchYouTube(serviceName)
@@ -74,7 +70,7 @@ export async function getYouTubeVideo(serviceName: string): Promise<YouTubeVideo
         return null
     }
 
-    const selectedVideo = await chooseVideo(serviceName, searchResults.items)
+    const selectedVideo = await chooseYouTubeVideo(serviceName, searchResults.items)
     return selectedVideo
 }
 
