@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "../../../io.meimberg.ansible"
+		},
+		{
+			"path": "../../../io.meimberg.meta"
+		},
+		{
+			"path": "../../../awesomeapps.strapi"
+		},
+		{
+			"path": "../../../awesomeapps.frontend"
+		},
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../io.meimberg.www"
+		}
+	],
+	"settings": {}
+}

@@ -74,24 +74,27 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
         data.url = existingService.url
     }
 
+    const detailedService = service + "(" + data.url + ")"
+
+
     if (shouldExecuteField(fields, 'description')) {
-        data.description = await openai.generateDescription(service)    
+        data.description = await openai.generateDescription(detailedService)    
     }
 
     if (shouldExecuteField(fields, 'abstract')) {
-        data.abstract = await openai.generateAbstract(service)       
+        data.abstract = await openai.generateAbstract(detailedService)       
     }
 
     if (shouldExecuteField(fields, 'functionality')) {
-        data.functionality = await openai.generateFunctionality(service)
+        data.functionality = await openai.generateFunctionality(detailedService)
     }
 
-    if (shouldExecuteField(fields, 'shorty')) {
-        data.shortfacts = await openai.generateShortfacts(service)
+    if (shouldExecuteField(fields, 'shortfacts')) {
+        data.shortfacts = await openai.generateShortfacts(detailedService)
     }
 
     if (shouldExecuteField(fields, 'pricing')) {
-        data.pricing = await gemini.generatePricing(service)
+        data.pricing = await gemini.generatePricing(detailedService)
     }
 
     if (shouldExecuteField(fields, 'tags')) {
@@ -112,7 +115,7 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
         let selectedTagNames: string[] = []
 
         if (allowedTagNames.length > 0) {
-            const selectedTagsString = await gemini.chooseTags(service, allowedTagNames)
+            const selectedTagsString = await gemini.chooseTags(detailedService, allowedTagNames)
             selectedTagNames = selectedTagsString.split(',').map(t => t.trim()).filter(Boolean)
         }
 
@@ -141,7 +144,7 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
     }
 
     if (shouldExecuteField(fields, 'video')) {
-        const selectedVideo = await youtube.getYouTubeVideo(service)
+        const selectedVideo = await youtube.getYouTubeVideo(detailedService)
 
         if (selectedVideo && selectedVideo.id && selectedVideo.id.videoId) {
             data.youtube_video = selectedVideo.id.videoId
