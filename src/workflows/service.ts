@@ -173,10 +173,15 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
     // Translation workflow call - translate fields that were updated
     try {
         const translationCandidates = ['abstract', 'description', 'functionality', 'shortfacts', 'pricing'] as const
+        const requestedFields = fields ?? []
+        const isFullRegeneration =
+            requestedFields.length === 0 ||
+            requestedFields.includes('') ||
+            requestedFields.includes('all')
         const translationFields = translationCandidates.filter(field => {  
-            return fields.includes(field) || !fields || fields.length === 0
+            return isFullRegeneration || requestedFields.includes(field)
         })
-        log.info('Translation fields', { translationFields })
+        log.info('Translation fields', { translationFields, isFullRegeneration })
         
         if (translationFields.length > 0) {
             await strapi.triggerTranslationWorkflow(resultDocumentId, translationFields)

@@ -33,7 +33,16 @@ async function strapiRequest(endpoint: string, options: RequestInit = {}): Promi
     throw new Error(`Strapi API error: ${response.status} ${response.statusText} - ${errorText}`)
   }
 
-  return response.json()
+  // Some Strapi endpoints (e.g., DELETE) may return 204 No Content or an empty body
+  const contentType = response.headers.get('content-type') ?? ''
+  const text = await response.text()
+  if (!text) {
+    return contentType.includes('application/json') ? {} : undefined
+  }
+  if (contentType.includes('application/json')) {
+    return JSON.parse(text)
+  }
+  return text
 }
 
 async function strapiGraphQL(query: string): Promise<any> {
@@ -215,12 +224,12 @@ export async function fetchAndUploadLogo(domain: string): Promise<UploadLogoResp
   // }
 }
 
-export async function getServiceByDocumentId(documentId: string): Promise<StrapiServiceDetailResponse> {
-  log.info('Fetching service by documentId', { documentId })
+export async function getServiceByDocumentId(documentId: string, locale?: string): Promise<StrapiServiceDetailResponse> {
+  log.info('Fetching service by documentId', { documentId, locale })
 
   const query = `
-    query GetServiceByDocumentId($documentId: ID!) {
-      services(filters: { documentId: { eq: $documentId } }) {
+    query GetServiceByDocumentId($documentId: ID!, $locale: I18NLocaleCode) {
+      services(filters: { documentId: { eq: $documentId } }, locale: $locale) {
         documentId
         name
         slug
@@ -244,7 +253,7 @@ export async function getServiceByDocumentId(documentId: string): Promise<Strapi
     }
   `
 
-  const variables = { documentId }
+  const variables = { documentId, locale }
 
   const response = await fetch(STRAPI_GRAPHQL_URL, {
     method: 'POST',

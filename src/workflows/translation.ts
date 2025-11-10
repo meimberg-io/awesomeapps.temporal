@@ -18,16 +18,20 @@ const translation = proxyActivities<typeof translationActivities>({
 })
 
 export async function translationWorkflow(input: TranslationWorkflowInput): Promise<{success: boolean}> {
-  const {documentId, serviceName, fields = []} = input
+  const {documentId, fields = []} = input
 
-  // Fetch service details from Strapi
+  // Fetch service details from Strapi (EN)
   const serviceResponse = await strapi.getServiceByDocumentId(documentId)
+  const translatedServiceResponse = await strapi.getServiceByDocumentId(documentId, 'de')
   
   if (!serviceResponse.data.services || serviceResponse.data.services.length === 0) {
-    throw new Error(`Service not found: ${serviceName} (${documentId})`)
+    throw new Error(`Service not found: (${documentId})`)
   }
 
   const service = serviceResponse.data.services[0] as StrapiServiceDetail
+  const translatedService = translatedServiceResponse.data.services && translatedServiceResponse.data.services.length > 0
+    ? translatedServiceResponse.data.services[0] as StrapiServiceDetail
+    : undefined
 
   // Start with all existing service fields (like n8n Data Array node)
   const translationData: TranslationData = {
@@ -55,24 +59,54 @@ export async function translationWorkflow(input: TranslationWorkflowInput): Prom
   // Translate only fields that exist and were requested (or translate all if no fields specified)
   const shouldTranslate = (field: string) => fields.length === 0 || fields.includes(field)
 
-  if (service.abstract && shouldTranslate('abstract')) {
-    translationData.abstract = await translation.translateAbstract(service.abstract)
+  if (shouldTranslate('abstract')) {
+    if (service.abstract) {
+      translationData.abstract = await translation.translateAbstract(service.abstract)
+    } else {
+      translationData.abstract = ''
+    }
+  } else if (translatedService?.abstract) {
+    translationData.abstract = translatedService.abstract
   }
 
-  if (service.description && shouldTranslate('description')) {
-    translationData.description = await translation.translateDescription(service.description)
+  if (shouldTranslate('description')) {
+    if (service.description) {
+      translationData.description = await translation.translateDescription(service.description)
+    } else {
+      translationData.description = ''
+    }
+  } else if (translatedService?.description) {
+    translationData.description = translatedService.description
   }
 
-  if (service.functionality && shouldTranslate('functionality')) {
-    translationData.functionality = await translation.translateFunctionality(service.functionality)
+  if (shouldTranslate('functionality')) {
+    if (service.functionality) {
+      translationData.functionality = await translation.translateFunctionality(service.functionality)
+    } else {
+      translationData.functionality = ''
+    }
+  } else if (translatedService?.functionality) {
+    translationData.functionality = translatedService.functionality
   }
 
-  if (service.shortfacts && shouldTranslate('shortfacts')) {
-    translationData.shortfacts = await translation.translateShortfacts(service.shortfacts)
+  if (shouldTranslate('shortfacts')) {
+    if (service.shortfacts) {
+      translationData.shortfacts = await translation.translateShortfacts(service.shortfacts)
+    } else {
+      translationData.shortfacts = ''
+    }
+  } else if (translatedService?.shortfacts) {
+    translationData.shortfacts = translatedService.shortfacts
   }
 
-  if (service.pricing && shouldTranslate('pricing')) {
-    translationData.pricing = await translation.translatePricing(service.pricing)
+  if (shouldTranslate('pricing')) {
+    if (service.pricing) {
+      translationData.pricing = await translation.translatePricing(service.pricing)
+    } else {
+      translationData.pricing = ''
+    }
+  } else if (translatedService?.pricing) {
+    translationData.pricing = translatedService.pricing
   }
 
   // Update Strapi with German translations
