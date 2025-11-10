@@ -62,7 +62,7 @@ services:
       - temporal
 
   temporal-worker:
-    profiles: ["dev"]
+    profiles: ["dev",""]
     build:
       context: .
       dockerfile: Dockerfile.dev
