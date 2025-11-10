@@ -1,4 +1,4 @@
-import {proxyActivities} from '@temporalio/workflow'
+import {proxyActivities, log} from '@temporalio/workflow'
 import type * as strapiActivities from '../activities/strapi'
 import type * as geminiActivities from '../activities/gemini'
 import type * as openaiActivities from '../activities/openai'
@@ -173,18 +173,13 @@ export async function serviceWorkflow(input: ServiceWorkflowInput): Promise<{ su
     // Translation workflow call - translate fields that were updated
     try {
         const translationCandidates = ['abstract', 'description', 'functionality', 'shortfacts', 'pricing'] as const
-        const translationFields = translationCandidates.filter(field => {
-            if (finalData[field] === undefined) {
-                return false
-            }
-            if (!fields || fields.length === 0) {
-                return true
-            }
-            return fields.includes(field)
+        const translationFields = translationCandidates.filter(field => {  
+            return fields.includes(field) || !fields || fields.length === 0
         })
+        log.info('Translation fields', { translationFields })
         
         if (translationFields.length > 0) {
-            await strapi.triggerTranslationWorkflow(resultDocumentId, data.name || service, translationFields)
+            await strapi.triggerTranslationWorkflow(resultDocumentId, translationFields)
         }
     } catch (error) {
         // Translation workflow is optional, continue on error

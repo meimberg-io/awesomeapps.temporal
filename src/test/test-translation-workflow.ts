@@ -8,7 +8,6 @@ async function testTranslationWorkflow() {
   
   const result = await startTranslationWorkflow({
     documentId,
-    serviceName: 'Test Service',
     fields: ['abstract', 'description']
   })
   

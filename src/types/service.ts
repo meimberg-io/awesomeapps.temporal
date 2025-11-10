@@ -79,7 +79,6 @@ export interface UploadLogoResponse {
 
 export interface TranslationWorkflowInput {
   documentId: string
-  serviceName: string
   fields?: string[]
 }
 

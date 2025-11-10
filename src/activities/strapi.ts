@@ -284,8 +284,8 @@ export async function updateServiceTranslation(documentId: string, translationDa
   log.info('Service translation updated successfully', { documentId, locale: 'de' })
 }
 
-export async function triggerTranslationWorkflow(documentId: string, serviceName: string, fields?: string[]): Promise<void> {
-  log.info('Triggering translation workflow', { documentId, serviceName, fields })
+export async function triggerTranslationWorkflow(documentId: string, fields?: string[]): Promise<void> {
+  log.info('Triggering translation workflow', { documentId, fields })
   
   const { Connection, Client } = await import('@temporalio/client')
   const { translationWorkflow } = await import('../workflows/translation')
@@ -303,7 +303,6 @@ export async function triggerTranslationWorkflow(documentId: string, serviceName
     await client.workflow.start(translationWorkflow, {
       args: [{
         documentId,
-        serviceName,
         fields: fields || []
       }],
       taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'awesomeapps-tasks',

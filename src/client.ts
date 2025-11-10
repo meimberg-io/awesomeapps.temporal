@@ -53,7 +53,6 @@ export async function startTranslationWorkflow(input: TranslationWorkflowInput) 
   console.log('Translation workflow started', {
     workflowId: handle.workflowId,
     runId: handle.firstExecutionRunId,
-    serviceName: input.serviceName,
     documentId: input.documentId
   })
 
